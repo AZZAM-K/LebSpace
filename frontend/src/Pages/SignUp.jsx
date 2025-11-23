@@ -42,7 +42,7 @@ const SignUp = () => {
     <div className='min-h-screen bg-black flex items-center justify-center p-4'>
       <div className='flex flex-col md:flex-row items-center gap-8 max-w-6xl w-full'>
         <div className='hidden md:block flex-1'>
-          <img src='/Logo.jpg' alt='Logo' className='w-full object-contain' />
+          <img src='/Logo.png' alt='Logo' className='w-full object-contain' />
         </div>
 
         <div className='flex-1 w-full max-w-md p-10 bg-black rounded-xl shadow-2xl border border-gray-600'>

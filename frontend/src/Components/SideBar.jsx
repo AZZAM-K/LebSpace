@@ -10,15 +10,19 @@ import {
   User,
 } from 'lucide-react'
 import { AppContext } from '../Context/context'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
-const MenuItem = ({ Icon, label, to }) => {
+const MenuItem = ({ Icon, label, to, inPage }) => {
   return (
     <Link
       to={to}
-      className='flex items-center gap-4 px-4 py-2.5 rounded-xl text-lg font-medium transition duration-200 w-full text-left text-gray-300 hover:bg-[#F65C21] hover:text-white'
+      className={`flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium cursor-pointer transition-all ${
+        inPage
+          ? 'bg-[#F65C21]/10 text-[#F65C21]'
+          : 'text-gray-400 hover:text-white'
+      }`}
     >
-      <Icon size={20} className='min-w-fit' />
+      <Icon size={22} />
       <span>{label}</span>
     </Link>
   )
@@ -27,6 +31,7 @@ const MenuItem = ({ Icon, label, to }) => {
 const SideBar = () => {
   const { logout } = useContext(AppContext)
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = () => {
     logout()
@@ -35,94 +40,98 @@ const SideBar = () => {
 
   return (
     <>
-      <div
-        className='hidden md:flex w-64 min-h-screen bg-black text-white flex-col justify-between p-5 shadow-2xl border-r
-       border-[#1A4248]'
-      >
-        <div className='flex flex-col'>
-          <Link
-            to={'/'}
-            className='flex items-center justify-start mb-10 pl-2 cursor-pointer'
-          >
-            <div>
-              <img src='/Logo.jpg' alt='Logo' className='mr-10 w-20 ' />
-            </div>
-            <div className='text-2xl font-semibold mr-7'>LebSpace</div>
-          </Link>
-
-          <div className='flex flex-col space-y-2'>
-            <MenuItem Icon={Home} label='Home' to='/' />
-            <MenuItem Icon={Bell} label='Notifications' to='/notifications' />
-            <MenuItem Icon={Mail} label='Messages' to='/messages' />
-            <MenuItem Icon={Settings} label='Settings' to='/settings' />
+      <div className='hidden md:flex w-64 h-screen fixed left-0 top-0 bg-black border-r border-gray-800 flex-col p-5 z-50'>
+        <Link to='/' className='flex items-center gap-2 mb-10 pl-2'>
+          <img
+            src='/Logo.png'
+            alt='LebSpace'
+            className='w-16 h-16 rounded-xl object-cover'
+          />
+          <div className='text-2xl font-bold text-white tracking-wide'>
+            LebSpace
           </div>
-
-          <button
-            onClick={() => navigate('/create')}
-            className='flex items-center text-gray-300 hover:bg-orange-600 hover:text-white gap-4 px-4 py-3 mt-6 rounded-xl
-             font-bold transition duration-200 w-full justify-start'
-          >
-            <Plus size={20} className='stroke-2' />
-            <span>Post New</span>
-          </button>
+        </Link>
+        <div className='space-y-2 flex-1'>
+          <MenuItem
+            Icon={Home}
+            label='Home'
+            to='/'
+            inPage={location.pathname === '/'}
+          />
+          <MenuItem
+            Icon={Bell}
+            label='Notifications'
+            to='/notifications'
+            inPage={location.pathname === '/notifications'}
+          />
+          <MenuItem
+            Icon={Mail}
+            label='Messages'
+            to='/messages'
+            inPage={location.pathname === '/messages'}
+          />
+          <MenuItem
+            Icon={Settings}
+            label='Settings'
+            to='/settings'
+            inPage={location.pathname === '/settings'}
+          />
         </div>
 
-        <hr className='border-t border-[#1A4248] my-4' />
-
-        <div>
+        <div className='border-t border-gray-800 pt-4'>
           <button
             onClick={handleLogout}
-            className='flex items-center gap-4 text-white font-semibold hover:text-red-700 transition duration-200 w-full
-             justify-start ml-4'
+            className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
           >
-            <LogOut size={20} />
+            <LogOut size={22} />
             <span>Log Out</span>
           </button>
         </div>
       </div>
-
-      <div
-        className='fixed h-18 bottom-3 left-1/2 -translate-x-1/2 
-  w-[95%] bg-black/60 backdrop-blur-xl 
-  rounded-3xl shadow-[0_4px_25px_rgba(0,0,0,0.4)]
-  py-4 px-3 flex justify-around items-center
-  md:hidden transition-all duration-300'
-      >
-        <button
-          onClick={() => navigate('/')}
-          className={`flex flex-col items-center transition transform active:scale-90 
+      <div className='md:hidden fixed bottom-0 left-0 right-0 z-50'>
+        <div
+          className='fixed h-20 bottom-0 left-0 right-0
+  w-full bg-black/80 backdrop-blur-xl 
+  border-t border-[#F65C21]
+  py-3 px-3 flex justify-around items-center
+  md:hidden shadow-[0_-4px_25px_rgba(0,0,0,0.4)]'
+        >
+          <button
+            onClick={() => navigate('/')}
+            className={`flex flex-col items-center transition transform active:scale-90 
       ${location.pathname === '/' ? 'text-orange-500' : 'text-gray-400'}`}
-        >
-          <Home size={32} />
-        </button>
+          >
+            <Home size={32} />
+          </button>
 
-        <button
-          onClick={() => navigate('/search')}
-          className={`flex flex-col items-center transition transform active:scale-90
+          <button
+            onClick={() => navigate('/search')}
+            className={`flex flex-col items-center transition transform active:scale-90
       ${location.pathname === '/search' ? 'text-orange-500' : 'text-gray-400'}`}
-        >
-          <Search size={32} />
-        </button>
+          >
+            <Search size={32} />
+          </button>
 
-        <button
-          onClick={() => navigate('/messages')}
-          className={`flex flex-col items-center transition transform active:scale-90
+          <button
+            onClick={() => navigate('/messages')}
+            className={`flex flex-col items-center transition transform active:scale-90
       ${
         location.pathname === '/messages' ? 'text-orange-500' : 'text-gray-400'
       }`}
-        >
-          <Mail size={32} />
-        </button>
+          >
+            <Mail size={32} />
+          </button>
 
-        <button
-          onClick={() => navigate('/profile')}
-          className={`flex flex-col items-center transition transform active:scale-90
+          <button
+            onClick={() => navigate('/profile')}
+            className={`flex flex-col items-center transition transform active:scale-90
       ${
         location.pathname === '/profile' ? 'text-orange-500' : 'text-gray-400'
       }`}
-        >
-          <User size={32} />
-        </button>
+          >
+            <User size={32} />
+          </button>
+        </div>
       </div>
     </>
   )

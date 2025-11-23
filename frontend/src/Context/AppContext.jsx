@@ -6,7 +6,9 @@ const AppContextProvider = props => {
 
   const [token, setToken] = useState(localStorage.getItem('token') || '')
 
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(
+    JSON.parse(localStorage.getItem('user')) || null
+  )
 
   const signup = async formData => {
     try {
@@ -24,10 +26,25 @@ const AppContextProvider = props => {
 
       localStorage.setItem('token', data.token)
       setToken(data.token)
+
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          fullName: data.fullName,
+          bio: data.bio,
+          email: data.email,
+          img: data.img,
+        })
+      )
       setUser({
         id: data.id,
-        name: data.name,
+        username: data.username,
+        fullName: data.fullName,
+        bio: data.bio,
         email: data.email,
+        img: data.img,
       })
 
       return { success: true }
@@ -53,10 +70,25 @@ const AppContextProvider = props => {
 
       localStorage.setItem('token', data.token)
       setToken(data.token)
+
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          fullName: data.fullName,
+          bio: data.bio,
+          email: data.email,
+          img: data.img,
+        })
+      )
       setUser({
         id: data.id,
-        name: data.name,
+        username: data.username,
+        fullName: data.fullName,
+        bio: data.bio,
         email: data.email,
+        img: data.img,
       })
 
       return { success: true }
@@ -67,8 +99,77 @@ const AppContextProvider = props => {
 
   const logout = () => {
     localStorage.removeItem('token')
+    localStorage.removeItem('user')
     setToken('')
     setUser(null)
+  }
+
+  const getProfile = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/api/users/profile`, {
+        headers: {
+          Authorization: token,
+        },
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        console.log('Error getting profile:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error getting profile',
+        }
+      }
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const updateProfile = async formData => {
+    try {
+      const res = await fetch(`${backendUrl}/api/users/profile`, {
+        method: 'PUT',
+        headers: {
+          Authorization: token,
+        },
+        body: formData,
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        console.log('Error updating profile:', data.message)
+        return {
+          success: false,
+          message: data.message || 'Error updating profile',
+        }
+      }
+
+      localStorage.setItem(
+        'user',
+        JSON.stringify({
+          id: data.id,
+          username: data.username,
+          fullName: data.fullName,
+          bio: data.bio,
+          email: data.email,
+          img: data.img,
+        })
+      )
+      setUser({
+        id: data.id,
+        username: data.username,
+        fullName: data.fullName,
+        bio: data.bio,
+        email: data.email,
+        img: data.img,
+      })
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
   }
 
   const value = {
@@ -80,6 +181,8 @@ const AppContextProvider = props => {
     login,
     signup,
     logout,
+    getProfile,
+    updateProfile,
   }
 
   return (

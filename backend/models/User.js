@@ -2,7 +2,18 @@ import mongoose from 'mongoose'
 
 const UserSchema = new mongoose.Schema(
   {
-    username: { type: String, required: true, unique: true, index: true },
+    username: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,
+      minLength: [5, 'Username must be at least 5 characters long.'],
+      maxLength: [20, 'Username cannot exceed 20 characters.'],
+      match: [
+        /^[a-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers, and underscores.',
+      ],
+    },
     fullName: { type: String },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -12,7 +23,7 @@ const UserSchema = new mongoose.Schema(
       url: { type: String, default: '' },
     },
 
-    bio: { type: String, default: '' },
+    bio: { type: String, default: '', maxLength: 150 },
     gender: { type: String, enum: ['male', 'female'], required: true },
     dateOfBirth: { type: Date, required: true },
 

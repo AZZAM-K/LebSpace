@@ -1,20 +1,14 @@
-import Navbar from "../Components/Navbar"
-import SideBar from "../Components/SideBar"
-import SideBar2 from "../Components/SideBar2"
+import Navbar from '../Components/Navbar'
+import SideBar from '../Components/SideBar'
+import SideBar2 from '../Components/SideBar2'
 
 const Home = () => {
   return (
-    <div className='flex text-white bg-black/80 min-h-screen'>
-      <SideBar />
-
-      <div className='flex flex-1 flex-col'>
-        <Navbar />
-        <div className='flex flex-1 p-8 gap-6'>
-          <div className='hidden lg:block w-[400px]'>
-            <SideBar2 />
-          </div>
-        </div>
+    <div className='flex flex-1 p-4 md:p-8 gap-6 pb-24 md:pb-8 overflow-y-auto'>
+      <div className='hidden lg:block w-[400px] shrink-0'>
+        <SideBar2 />
       </div>
+      <div className='flex-1 text-amber-50'></div>
     </div>
   )
 }
