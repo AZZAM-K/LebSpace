@@ -57,11 +57,11 @@ const Navbar = () => {
           >
             <img
               src={
-                user?.profilePicture?.url ||
-                `https://ui-avatars.com/api/?name=${user.username}&background=random`
+                user?.img ||
+                `https://ui-avatars.com/api/?name=${user?.username}&background=random`
               }
-              alt='Profile'
-              className='w-full h-full rounded-full object-cover border-4 border-black bg-gray-800'
+              alt={user?.username}
+              className='w-full h-full object-cover'
             />
           </Link>
         </div>

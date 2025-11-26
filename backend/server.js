@@ -8,9 +8,12 @@ import './models/Comment.js'
 import './models/Story.js'
 
 import userRouter from './routes/user.route.js'
+
 import postRouter from './routes/post.route.js'
 import storyRouter from './routes/story.route.js'
 import commentRouter from './routes/comment.route.js'
+import NotificationRouter from './routes/notification.route.js'
+
 import cors from 'cors'
 
 dotenv.config()
@@ -32,6 +35,8 @@ app.use('/api/users', userRouter)
 app.use('/api/post', postRouter)
 app.use('/api/story', storyRouter)
 app.use('/api/comment', commentRouter)
+app.use('/api/notifications', NotificationRouter)
+
 
 app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`)

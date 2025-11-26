@@ -13,15 +13,11 @@ const MenuItem = ({ Icon, label, to, inPage }) => {
   return (
     <Link
       to={to}
-      aria-label={label}
-      className={`flex items-center gap-4 p-3 rounded-full text-lg font-medium cursor-pointer transition-all duration-200 
-        ${HOVER_BG_CLASS} 
-        ${
-          inPage
-            ? `${ACCENT_COLOR_CLASS} ${ACTIVE_BG_CLASS}`
-            : `${TEXT_DEFAULT_CLASS} ${TEXT_HOVER_CLASS}`
-        }
-      `}
+      className={`flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium cursor-pointer transition-all ${
+        inPage
+          ? 'bg-[#F65C21]/10 text-[#F65C21]'
+          : 'text-gray-400 hover:text-white hover:bg-gray-900'
+      }`}
     >
       <Icon size={24} className='min-w-[24]' />
       <span className='hidden lg:inline'>{label}</span>

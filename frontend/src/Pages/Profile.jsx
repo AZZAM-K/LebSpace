@@ -1,6 +1,6 @@
-import { useState, useContext, useEffect, useEffectEvent } from "react"
-import { AppContext } from "../Context/context"
-import { Link, useNavigate } from "react-router"
+import { useState, useContext, useEffect, useEffectEvent } from 'react'
+import { AppContext } from '../Context/context'
+import { Link } from 'react-router'
 
 import {
   Grid,
@@ -9,20 +9,19 @@ import {
   Heart,
   MessageCircle,
   Settings,
-  Link as LinkIcon,
   Camera,
-} from "lucide-react"
+  Loader2,
+} from 'lucide-react'
 
 const Profile = () => {
-  const { getProfile } = useContext(AppContext)
-  const [activeTab, setActiveTab] = useState("posts")
-  const [error, setError] = useState("")
+  const { getMyProfile } = useContext(AppContext)
+  const [activeTab, setActiveTab] = useState('posts')
+  const [error, setError] = useState('')
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const navigate = useNavigate()
 
   const fetchProfileEvent = useEffectEvent(async () => {
-    const result = await getProfile()
+    const result = await getMyProfile()
     if (!result.success) {
       setError(result.message || "Failed to load profile")
     }
@@ -50,19 +49,11 @@ const Profile = () => {
 
   if (loading) {
     return (
-      <div className='min-h-screen bg-black flex items-center justify-center'>
-        <div className='w-16 h-16 border-4 border-t-4 border-gray-600 border-t-transparent rounded-full animate-spin'></div>
+      <div className='min-h-screen bg-[#0a0a0a] flex items-center justify-center'>
+        <Loader2 className='w-12 h-12 text-gray-600 animate-spin' />
       </div>
     )
   }
-
-  if (!user) {
-    navigate("/login")
-  }
-  console.log("USER:", user)
-  console.log("USER POSTS:", user?.posts)
-console.log(JSON.stringify(user.posts, null, 2));
-
 
   return (
     <div className='flex-1 relative'>
@@ -105,9 +96,12 @@ console.log(JSON.stringify(user.posts, null, 2));
                   >
                     Share
                   </button>
-                  <button className='p-1.5 bg-gray-800 rounded-lg hover:bg-gray-700 text-white'>
+                  <Link
+                    to='/settings'
+                    className='p-1.5 bg-gray-800 rounded-lg hover:bg-gray-700 text-white'
+                  >
                     <Settings size={18} />
-                  </button>
+                  </Link>
                 </div>
               </div>
 
@@ -121,18 +115,24 @@ console.log(JSON.stringify(user.posts, null, 2));
                   </span>
                   <span className='text-gray-400'>posts</span>
                 </div>
-                <div className='text-center md:text-left'>
+                <Link
+                  to={`/users/${user._id}/followers`}
+                  className='text-center md:text-left'
+                >
                   <span className='font-bold block md:inline text-white mr-1'>
                     {user.followers.length}
                   </span>
                   <span className='text-gray-400'>followers</span>
-                </div>
-                <div className='text-center md:text-left'>
+                </Link>
+                <Link
+                  to={`/users/${user._id}/followers`}
+                  className='text-center md:text-left'
+                >
                   <span className='font-bold block md:inline text-white mr-1'>
                     {user.following.length}
                   </span>
                   <span className='text-gray-400'>following</span>
-                </div>
+                </Link>
               </div>
 
               <div className='hidden md:block'>
