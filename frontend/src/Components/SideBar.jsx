@@ -19,7 +19,7 @@ const MenuItem = ({ Icon, label, to, inPage }) => {
       className={`flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium cursor-pointer transition-all ${
         inPage
           ? 'bg-[#F65C21]/10 text-[#F65C21]'
-          : 'text-gray-400 hover:text-white'
+          : 'text-gray-400 hover:text-white hover:bg-gray-900'
       }`}
     >
       <Icon size={22} />

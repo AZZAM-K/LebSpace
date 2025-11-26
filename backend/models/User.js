@@ -35,7 +35,6 @@ const UserSchema = new mongoose.Schema(
     savedPosts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Post' }],
 
     stories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }],
-    closeFriends: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
 
     isOnline: { type: Boolean, default: false },
     lastSeen: { type: Date },

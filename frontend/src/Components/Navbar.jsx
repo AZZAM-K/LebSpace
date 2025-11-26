@@ -28,10 +28,10 @@ const Navbar = () => {
           >
             <img
               src={
-                user.img ||
-                `https://ui-avatars.com/api/?name=${user.username}&background=random`
+                user?.img ||
+                `https://ui-avatars.com/api/?name=${user?.username}&background=random`
               }
-              alt={user.username}
+              alt={user?.username}
               className='w-full h-full object-cover'
             />
           </Link>

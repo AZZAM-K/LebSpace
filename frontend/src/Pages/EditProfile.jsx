@@ -163,10 +163,7 @@ const EditProfile = () => {
                   </div>
                 </div>
               </div>
-
-              {/* 2. Text Fields Section */}
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {/* Username */}
                 <div className='space-y-2'>
                   <label className='text-sm font-medium text-gray-300 ml-1'>
                     Username
@@ -189,7 +186,6 @@ const EditProfile = () => {
                   </div>
                 </div>
 
-                {/* Full Name */}
                 <div className='space-y-2'>
                   <label className='text-sm font-medium text-gray-300 ml-1'>
                     Display Name
@@ -210,7 +206,6 @@ const EditProfile = () => {
                   </div>
                 </div>
 
-                {/* Bio (Full Width) */}
                 <div className='col-span-1 md:col-span-2 space-y-2'>
                   <div className='flex justify-between ml-1'>
                     <label className='text-sm font-medium text-gray-300'>

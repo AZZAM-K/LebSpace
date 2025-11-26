@@ -1,8 +1,21 @@
+import { useContext, useEffect, useEffectEvent } from 'react'
 import Navbar from './Navbar'
 import SideBar from './SideBar'
-import { Outlet } from 'react-router'
+import { Outlet, useNavigate } from 'react-router'
+import { AppContext } from '../Context/context'
 
 const Layout = () => {
+  const { user } = useContext(AppContext)
+  const navigate = useNavigate()
+
+  const navigateEvent = useEffectEvent(() => {
+    if (!user) navigate('/login')
+  })
+
+  useEffect(() => {
+    navigateEvent()
+  }, [user])
+
   return (
     <main className='min-h-screen bg-[#0a0a0a] font-sans flex text-gray-100'>
       <SideBar />

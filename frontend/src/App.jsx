@@ -5,6 +5,10 @@ import SignUp from './Pages/SignUp'
 import Home from './Pages/Home'
 import Profile from './Pages/Profile'
 import EditProfile from './Pages/EditProfile'
+import User from './Pages/User.jsx'
+import Followers from './Pages/Followers'
+import Notifications from './Pages/Notifications.jsx'
+import Settings from './Pages/Settings.jsx'
 
 function App() {
   return (
@@ -13,6 +17,10 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/profile/edit' element={<EditProfile />} />
+        <Route path='/users/:id' element={<User />} />
+        <Route path='/users/:id/followers' element={<Followers />} />
+        <Route path='/notifications' element={<Notifications />} />
+        <Route path='/settings' element={<Settings />} />
       </Route>
       <Route path='/login' element={<Login />} />
       <Route path='/signup' element={<SignUp />} />
