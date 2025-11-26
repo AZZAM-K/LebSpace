@@ -1,6 +1,6 @@
-import { useState, useContext, useEffect, useEffectEvent } from 'react'
-import { AppContext } from '../Context/context'
-import { Link, useNavigate } from 'react-router'
+import { useState, useContext, useEffect, useEffectEvent } from "react"
+import { AppContext } from "../Context/context"
+import { Link, useNavigate } from "react-router"
 
 import {
   Grid,
@@ -11,12 +11,12 @@ import {
   Settings,
   Link as LinkIcon,
   Camera,
-} from 'lucide-react'
+} from "lucide-react"
 
 const Profile = () => {
   const { getProfile } = useContext(AppContext)
-  const [activeTab, setActiveTab] = useState('posts')
-  const [error, setError] = useState('')
+  const [activeTab, setActiveTab] = useState("posts")
+  const [error, setError] = useState("")
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
@@ -24,10 +24,10 @@ const Profile = () => {
   const fetchProfileEvent = useEffectEvent(async () => {
     const result = await getProfile()
     if (!result.success) {
-      setError(result.message || 'Failed to load profile')
+      setError(result.message || "Failed to load profile")
     }
     setUser(result.data)
-    console.log('Profile data:', result.data)
+    console.log("Profile data:", result.data)
     setLoading(false)
   })
 
@@ -42,6 +42,11 @@ const Profile = () => {
       </div>
     )
   }
+  const sortedPosts = user?.posts
+    ? [...user.posts].sort(
+        (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+      )
+    : []
 
   if (loading) {
     return (
@@ -52,8 +57,12 @@ const Profile = () => {
   }
 
   if (!user) {
-    navigate('/login')
+    navigate("/login")
   }
+  console.log("USER:", user)
+  console.log("USER POSTS:", user?.posts)
+console.log(JSON.stringify(user.posts, null, 2));
+
 
   return (
     <div className='flex-1 relative'>
@@ -65,6 +74,7 @@ const Profile = () => {
                 className='w-24 h-24 md:w-40 md:h-40 rounded-full p-[3px] bg-linear-to-tr from-orange-400 via-[#F65C21]
                      to-orange-700'
               >
+              
                 <img
                   src={
                     user?.profilePicture?.url ||
@@ -143,39 +153,39 @@ const Profile = () => {
 
           <div className='border-t border-gray-800 flex justify-around md:justify-center gap-12 mb-4'>
             <button
-              onClick={() => setActiveTab('posts')}
+              onClick={() => setActiveTab("posts")}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === 'posts'
-                  ? 'border-white text-white'
-                  : 'text-gray-500 hover:text-gray-300'
+                activeTab === "posts"
+                  ? "border-white text-white"
+                  : "text-gray-500 hover:text-gray-300"
               }`}
             >
               <Grid size={16} />
               <span className='hidden sm:inline'>Posts</span>
             </button>
             <button
-              onClick={() => setActiveTab('saved')}
+              onClick={() => setActiveTab("saved")}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === 'saved'
-                  ? 'border-white text-white'
-                  : 'text-gray-500 hover:text-gray-300'
+                activeTab === "saved"
+                  ? "border-white text-white"
+                  : "text-gray-500 hover:text-gray-300"
               }`}
             >
               <Bookmark size={16} />
               <span className='hidden sm:inline'>Saved</span>
             </button>
             <button
-              onClick={() => setActiveTab('tagged')}
+              onClick={() => setActiveTab("tagged")}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === 'tagged'
-                  ? 'border-white text-white'
-                  : 'text-gray-500 hover:text-gray-300'
+                activeTab === "tagged"
+                  ? "border-white text-white"
+                  : "text-gray-500 hover:text-gray-300"
               }`}
             >
               <Tag size={16} />
@@ -183,31 +193,29 @@ const Profile = () => {
             </button>
           </div>
 
-          {activeTab === 'posts' && (
+          {activeTab === "posts" && (
             <>
               {user.posts.length > 0 ? (
                 <div className='grid grid-cols-3 gap-1 md:gap-6'>
-                  {user.posts.map(post => (
+                  {sortedPosts.map(post => (
                     <div
-                      key={post.id}
+                      key={post._id}
                       className='relative group aspect-square cursor-pointer bg-gray-900 overflow-hidden'
+                      onClick={() => navigate(`/post/${post._id}`)}
                     >
                       <img
-                        src={post.url}
+                        src={post.media?.url || "/fallback-image.png"}
                         alt='Post'
                         className='w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:opacity-50'
                       />
-                      <div
-                        className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/30
-                     text-white font-bold'
-                      >
+                      <div className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/30 text-white font-bold'>
                         <div className='flex items-center gap-1'>
                           <Heart size={20} fill='white' />
-                          <span>{post.likes}</span>
+                          <span>{post.likes?.length || 0}</span>
                         </div>
                         <div className='flex items-center gap-1'>
                           <MessageCircle size={20} fill='white' />
-                          <span>{post.comments}</span>
+                          <span>{post.comments?.length || 0}</span>
                         </div>
                       </div>
                     </div>
@@ -232,7 +240,7 @@ const Profile = () => {
             </>
           )}
 
-          {activeTab !== 'posts' && (
+          {activeTab !== "posts" && (
             <div className='flex flex-col items-center justify-center py-20 text-gray-500'>
               <Settings className='mb-4 animate-spin-slow' />
               <p>This section is under construction.</p>

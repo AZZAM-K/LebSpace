@@ -1,136 +1,171 @@
-import { useContext } from 'react'
-import {
-  Home,
-  Bell,
-  Search,
-  Mail,
-  Plus,
-  LogOut,
-  Settings,
-  User,
-} from 'lucide-react'
-import { AppContext } from '../Context/context'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useContext } from "react"
+import { Home, Bell, Search, Mail, LogOut, Settings } from "lucide-react"
+import { AppContext } from "../Context/context"
+import { Link, useNavigate, useLocation } from "react-router-dom"
+
+const ACCENT_COLOR_CLASS = "text-orange-400"
+const HOVER_BG_CLASS = "hover:bg-gray-800/50"
+const ACTIVE_BG_CLASS = "bg-gray-900"
+const TEXT_DEFAULT_CLASS = "text-gray-400"
+const TEXT_HOVER_CLASS = "hover:text-white"
 
 const MenuItem = ({ Icon, label, to, inPage }) => {
   return (
     <Link
       to={to}
-      className={`flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium cursor-pointer transition-all ${
-        inPage
-          ? 'bg-[#F65C21]/10 text-[#F65C21]'
-          : 'text-gray-400 hover:text-white'
-      }`}
+      aria-label={label}
+      className={`flex items-center gap-4 p-3 rounded-full text-lg font-medium cursor-pointer transition-all duration-200 
+        ${HOVER_BG_CLASS} 
+        ${
+          inPage
+            ? `${ACCENT_COLOR_CLASS} ${ACTIVE_BG_CLASS}`
+            : `${TEXT_DEFAULT_CLASS} ${TEXT_HOVER_CLASS}`
+        }
+      `}
     >
-      <Icon size={22} />
-      <span>{label}</span>
+      <Icon size={24} className='min-w-[24]' />
+      <span className='hidden lg:inline'>{label}</span>
     </Link>
   )
 }
 
+const MobileNavItem = ({ Icon, path, label }) => {
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  return (
+    <button
+      onClick={() => navigate(path)}
+      aria-label={`Go to ${label}`}
+      className={`flex flex-col items-center transition transform active:scale-90 duration-150
+        ${
+          location.pathname === path
+            ? ACCENT_COLOR_CLASS
+            : "text-gray-500 hover:text-white"
+        }`}
+    >
+      <Icon size={28} />
+    </button>
+  )
+}
+
 const SideBar = () => {
-  const { logout } = useContext(AppContext)
+  const { logout, user } = useContext(AppContext)
   const navigate = useNavigate()
   const location = useLocation()
 
   const handleLogout = () => {
     logout()
-    navigate('/login')
+    navigate("/login")
   }
+
+  const username = user?.username || "Guest"
 
   return (
     <>
-      <div className='hidden md:flex w-64 h-screen fixed left-0 top-0 bg-black border-r border-gray-800 flex-col p-5 z-50'>
-        <Link to='/' className='flex items-center gap-2 mb-10 pl-2'>
+      <div className='hidden md:flex w-20 lg:w-72 h-screen fixed left-0 top-0 bg-black border-r border-gray-900 flex-col p-2 lg:p-5 z-50 transition-all duration-300 ease-in-out'>
+        <Link
+          to='/'
+          className='flex items-center mb-10 p-1 lg:pl-2'
+          aria-label='Go to Home'
+        >
           <img
             src='/Logo.png'
-            alt='LebSpace'
-            className='w-16 h-16 rounded-xl object-cover'
+            alt='LebSpace Logo'
+            className='w-10 h-10 lg:w-16 lg:h-16 rounded-xl object-cover'
           />
-          <div className='text-2xl font-bold text-white tracking-wide'>
-            LebSpace
-          </div>
+          <span className='hidden lg:flex text-2xl font-extrabold text-white tracking-wider ml-2 items-center gap-1'>
+            <span className='text-orange-400'>Leb</span>Space
+          </span>
         </Link>
-        <div className='space-y-2 flex-1'>
+
+        <nav className='space-y-1 flex-1'>
           <MenuItem
             Icon={Home}
             label='Home'
             to='/'
-            inPage={location.pathname === '/'}
+            inPage={location.pathname === "/"}
           />
           <MenuItem
             Icon={Bell}
             label='Notifications'
             to='/notifications'
-            inPage={location.pathname === '/notifications'}
+            inPage={location.pathname === "/notifications"}
           />
           <MenuItem
             Icon={Mail}
             label='Messages'
             to='/messages'
-            inPage={location.pathname === '/messages'}
+            inPage={location.pathname === "/messages"}
           />
           <MenuItem
             Icon={Settings}
             label='Settings'
             to='/settings'
-            inPage={location.pathname === '/settings'}
+            inPage={location.pathname === "/settings"}
           />
-        </div>
+        </nav>
 
         <div className='border-t border-gray-800 pt-4'>
+          <Link
+            to='/profile'
+            className={`flex items-center gap-3 p-3 rounded-full ${HOVER_BG_CLASS} transition-all cursor-pointer mb-2`}
+          >
+            <div className='w-10 h-10 rounded-full bg-gray-800 overflow-hidden border-2 border-orange-400 '>
+              <img
+                src={
+                  user?.profilePicture?.url ||
+                  `https://ui-avatars.com/api/?name=${username}&background=1f2937&color=fbbf24&bold=true`
+                }
+                alt={`${username}'s Profile`}
+                className='w-full h-full object-cover'
+              />
+            </div>
+            <div className='hidden lg:block'>
+              <p className='text-white font-semibold truncate'>@{username}</p>
+              <p className='text-gray-500 text-sm'>View Profile</p>
+            </div>
+          </Link>
+
           <button
             onClick={handleLogout}
-            className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
+            aria-label='Log out of the application'
+            className='flex items-center gap-4 p-3 rounded-full text-lg font-medium text-gray-400 hover:text-red-400 hover:bg-red-900/40 transition-all w-full text-left'
           >
-            <LogOut size={22} />
-            <span>Log Out</span>
+            <LogOut size={24} className='min-w-[24]' />
+            <span className='hidden lg:inline'>Log Out</span>
           </button>
         </div>
       </div>
+
       <div className='md:hidden fixed bottom-0 left-0 right-0 z-50'>
         <div
           className='fixed h-20 bottom-0 left-0 right-0
-  w-full bg-black/80 backdrop-blur-xl 
-  border-t border-[#F65C21]
-  py-3 px-3 flex justify-around items-center
-  md:hidden shadow-[0_-4px_25px_rgba(0,0,0,0.4)]'
+            w-full bg-black/90 backdrop-blur-md 
+            border-t border-orange-500/50 
+            py-3 px-6 flex justify-around items-center
+            shadow-[0_-8px_30px_rgba(0,0,0,0.8)]'
         >
-          <button
-            onClick={() => navigate('/')}
-            className={`flex flex-col items-center transition transform active:scale-90 
-      ${location.pathname === '/' ? 'text-orange-500' : 'text-gray-400'}`}
-          >
-            <Home size={32} />
-          </button>
+          <MobileNavItem Icon={Home} path='/' label='Home' />
+          <MobileNavItem Icon={Search} path='/explore' label='Explore' />
 
-          <button
-            onClick={() => navigate('/search')}
-            className={`flex flex-col items-center transition transform active:scale-90
-      ${location.pathname === '/search' ? 'text-orange-500' : 'text-gray-400'}`}
-          >
-            <Search size={32} />
-          </button>
+          <MobileNavItem Icon={Mail} path='/messages' label='Messages' />
 
-          <button
-            onClick={() => navigate('/messages')}
-            className={`flex flex-col items-center transition transform active:scale-90
-      ${
-        location.pathname === '/messages' ? 'text-orange-500' : 'text-gray-400'
-      }`}
+          <Link
+            to={"/profile"}
+            className={
+              "w-10 h-10 rounded-full bg-gray-800 overflow-hidden border-2 transition-all duration-150"
+            }
           >
-            <Mail size={32} />
-          </button>
-
-          <button
-            onClick={() => navigate('/profile')}
-            className={`flex flex-col items-center transition transform active:scale-90
-      ${
-        location.pathname === '/profile' ? 'text-orange-500' : 'text-gray-400'
-      }`}
-          >
-            <User size={32} />
-          </button>
+            <img
+              src={
+                user?.profilePicture?.url ||
+                `https://ui-avatars.com/api/?name=${username}&background=1f2937&color=fbbf24&bold=true`
+              }
+              alt='Profile'
+              className='w-full h-full rounded-full object-cover'
+            />
+          </Link>
         </div>
       </div>
     </>

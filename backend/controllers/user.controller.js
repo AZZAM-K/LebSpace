@@ -1,7 +1,7 @@
-import User from '../models/User.js'
-import { generateToken } from '../utils/jwt.js'
-import bcrypt from 'bcrypt'
-import { cloudinary } from '../config/uploader.js'
+import User from "../models/User.js"
+import { generateToken } from "../utils/jwt.js"
+import bcrypt from "bcrypt"
+import { cloudinary } from "../config/uploader.js"
 
 export const signUp = async (req, res) => {
   try {
@@ -10,7 +10,7 @@ export const signUp = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: 'Username or email already exists' })
+        .json({ message: "Username or email already exists" })
     }
     const hashedPassword = await bcrypt.hash(password, 10)
     const newUser = new User({
@@ -42,11 +42,11 @@ export const login = async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({ email })
     if (!user) {
-      return res.status(400).json({ message: 'Email not found' })
+      return res.status(400).json({ message: "Email not found" })
     }
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.status(400).json({ message: 'Incorrect password' })
+      return res.status(400).json({ message: "Incorrect password" })
     }
     const token = generateToken(user._id)
     res.status(200).json({
@@ -65,9 +65,13 @@ export const login = async (req, res) => {
 
 export const getUserProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password')
+    const user = await User.findById(req.userId).select("-password").populate({
+      path: "posts",
+      select: "media likes comments createdAt updatedAt",
+    })
+
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
     res.status(200).json(user)
   } catch (error) {
@@ -80,7 +84,7 @@ export const updateUserProfile = async (req, res) => {
     const { username, fullName, bio } = req.body
     const user = await User.findById(req.userId)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     const usernameExist = await User.findOne({
@@ -88,17 +92,17 @@ export const updateUserProfile = async (req, res) => {
       _id: { $ne: req.userId },
     })
     if (usernameExist) {
-      return res.status(400).json({ message: 'Username already taken' })
+      return res.status(400).json({ message: "Username already taken" })
     }
 
     if (req.file) {
       try {
         const uploadResult = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
+            { resource_type: "auto" },
             (error, result) => {
               if (error) {
-                reject(new Error('Failed to upload avatar: ' + error.message))
+                reject(new Error("Failed to upload avatar: " + error.message))
               } else {
                 resolve(result)
               }
@@ -112,7 +116,7 @@ export const updateUserProfile = async (req, res) => {
             await cloudinary.uploader.destroy(user.profilePicture.public_id)
           } catch (deleteError) {
             res.status(500).json({
-              message: 'Failed to delete old avatar: ' + deleteError.message,
+              message: "Failed to delete old avatar: " + deleteError.message,
             })
           }
         }

@@ -1,5 +1,5 @@
-import { useContext, useState, useRef } from 'react'
-import { AppContext } from '../Context/context'
+import { useContext, useState, useRef } from "react"
+import { AppContext } from "../Context/context"
 import {
   Camera,
   Save,
@@ -7,8 +7,8 @@ import {
   AlertCircle,
   CheckCircle2,
   User,
-} from 'lucide-react'
-import { useNavigate } from 'react-router'
+} from "lucide-react"
+import { useNavigate } from "react-router"
 
 const EditProfile = () => {
   const navigate = useNavigate()
@@ -47,22 +47,22 @@ const EditProfile = () => {
 
     try {
       const data = new FormData()
-      data.append('username', formData.username)
-      data.append('fullName', formData.fullName)
-      data.append('bio', formData.bio)
+      data.append("username", formData.username)
+      data.append("fullName", formData.fullName)
+      data.append("bio", formData.bio)
 
       if (fileInputRef.current.files[0]) {
-        data.append('avatar', fileInputRef.current.files[0])
+        data.append("avatar", fileInputRef.current.files[0])
       }
 
       const result = await updateProfile(data)
       if (result.success) {
         setSuccess(true)
       } else {
-        setError(result.message || 'Failed to update profile')
+        setError(result.message || "Failed to update profile")
       }
     } catch (error) {
-      setError(error.message || 'Something went wrong')
+      setError(error.message || "Something went wrong")
     }
 
     setIsLoading(false)
@@ -164,9 +164,7 @@ const EditProfile = () => {
                 </div>
               </div>
 
-              {/* 2. Text Fields Section */}
               <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
-                {/* Username */}
                 <div className='space-y-2'>
                   <label className='text-sm font-medium text-gray-300 ml-1'>
                     Username
@@ -189,7 +187,6 @@ const EditProfile = () => {
                   </div>
                 </div>
 
-                {/* Full Name */}
                 <div className='space-y-2'>
                   <label className='text-sm font-medium text-gray-300 ml-1'>
                     Display Name
@@ -210,7 +207,6 @@ const EditProfile = () => {
                   </div>
                 </div>
 
-                {/* Bio (Full Width) */}
                 <div className='col-span-1 md:col-span-2 space-y-2'>
                   <div className='flex justify-between ml-1'>
                     <label className='text-sm font-medium text-gray-300'>
@@ -219,8 +215,8 @@ const EditProfile = () => {
                     <span
                       className={`text-xs ${
                         formData.bio.length > 150
-                          ? 'text-red-400'
-                          : 'text-gray-500'
+                          ? "text-red-400"
+                          : "text-gray-500"
                       }`}
                     >
                       {formData.bio.length}/150
@@ -246,7 +242,7 @@ const EditProfile = () => {
               <div className='flex items-center justify-end gap-4 pt-4 border-t border-gray-800'>
                 <button
                   type='button'
-                  onClick={() => navigate('/profile')}
+                  onClick={() => navigate("/profile")}
                   disabled={isLoading}
                   className='px-6 py-2.5 rounded-xl text-gray-300 font-medium hover:text-white hover:bg-gray-800 transition-colors'
                 >
@@ -260,8 +256,8 @@ const EditProfile = () => {
                                  shadow-orange-900/20
                                 ${
                                   isLoading
-                                    ? 'bg-gray-700 cursor-not-allowed'
-                                    : 'bg-[#F65C21] hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98]'
+                                    ? "bg-gray-700 cursor-not-allowed"
+                                    : "bg-[#F65C21] hover:bg-orange-600 hover:scale-[1.02] active:scale-[0.98]"
                                 }
                             `}
                 >
