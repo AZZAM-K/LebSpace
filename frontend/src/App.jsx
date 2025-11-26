@@ -5,6 +5,10 @@ import SignUp from './Pages/SignUp'
 import Home from './Pages/Home'
 import Profile from './Pages/Profile'
 import EditProfile from './Pages/EditProfile'
+import AddPost from './Pages/AddPost'
+import AddStory from './Pages/AddStory'
+import CommentPage from './Pages/CommentPage'
+import PostById from './Pages/PostById'
 import User from './Pages/User.jsx'
 import Followers from './Pages/Followers'
 import Notifications from './Pages/Notifications.jsx'
@@ -17,6 +21,11 @@ function App() {
         <Route path='/' element={<Home />} />
         <Route path='/profile' element={<Profile />} />
         <Route path='/profile/edit' element={<EditProfile />} />
+        <Route path='/add-post' element={<AddPost />} />
+        <Route path='/add-story' element={<AddStory />} />
+        <Route path='/post/:postId' element={<PostById />} />
+        <Route path='/post/:postId/add-comment' element={<CommentPage />} />
+
         <Route path='/users/:id' element={<User />} />
         <Route path='/users/:id/followers' element={<Followers />} />
         <Route path='/notifications' element={<Notifications />} />
