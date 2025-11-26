@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect, useEffectEvent } from 'react'
 import { AppContext } from '../Context/context'
-import { Link } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 
 import {
   Grid,
@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 
 const Profile = () => {
+  const navigate = useNavigate()
   const { getMyProfile } = useContext(AppContext)
   const [activeTab, setActiveTab] = useState('posts')
   const [error, setError] = useState('')
@@ -23,10 +24,10 @@ const Profile = () => {
   const fetchProfileEvent = useEffectEvent(async () => {
     const result = await getMyProfile()
     if (!result.success) {
-      setError(result.message || "Failed to load profile")
+      setError(result.message || 'Failed to load profile')
     }
     setUser(result.data)
-    console.log("Profile data:", result.data)
+    console.log('Profile data:', result.data)
     setLoading(false)
   })
 
@@ -65,7 +66,6 @@ const Profile = () => {
                 className='w-24 h-24 md:w-40 md:h-40 rounded-full p-[3px] bg-linear-to-tr from-orange-400 via-[#F65C21]
                      to-orange-700'
               >
-              
                 <img
                   src={
                     user?.profilePicture?.url ||
@@ -153,39 +153,39 @@ const Profile = () => {
 
           <div className='border-t border-gray-800 flex justify-around md:justify-center gap-12 mb-4'>
             <button
-              onClick={() => setActiveTab("posts")}
+              onClick={() => setActiveTab('posts')}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === "posts"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                activeTab === 'posts'
+                  ? 'border-white text-white'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Grid size={16} />
               <span className='hidden sm:inline'>Posts</span>
             </button>
             <button
-              onClick={() => setActiveTab("saved")}
+              onClick={() => setActiveTab('saved')}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === "saved"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                activeTab === 'saved'
+                  ? 'border-white text-white'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Bookmark size={16} />
               <span className='hidden sm:inline'>Saved</span>
             </button>
             <button
-              onClick={() => setActiveTab("tagged")}
+              onClick={() => setActiveTab('tagged')}
               className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === "tagged"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                activeTab === 'tagged'
+                  ? 'border-white text-white'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
             >
               <Tag size={16} />
@@ -193,7 +193,7 @@ const Profile = () => {
             </button>
           </div>
 
-          {activeTab === "posts" && (
+          {activeTab === 'posts' && (
             <>
               {user.posts.length > 0 ? (
                 <div className='grid grid-cols-3 gap-1 md:gap-6'>
@@ -204,7 +204,7 @@ const Profile = () => {
                       onClick={() => navigate(`/post/${post._id}`)}
                     >
                       <img
-                        src={post.media?.url || "/fallback-image.png"}
+                        src={post.media?.url || '/fallback-image.png'}
                         alt='Post'
                         className='w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:opacity-50'
                       />
@@ -240,7 +240,7 @@ const Profile = () => {
             </>
           )}
 
-          {activeTab !== "posts" && (
+          {activeTab !== 'posts' && (
             <div className='flex flex-col items-center justify-center py-20 text-gray-500'>
               <Settings className='mb-4 animate-spin-slow' />
               <p>This section is under construction.</p>
