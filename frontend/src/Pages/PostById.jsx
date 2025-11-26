@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useContext, useRef } from "react"
-import { useParams, useNavigate, Link } from "react-router-dom" // Use react-router-dom for Link
-import { AppContext } from "../Context/context" // Adjust path as necessary
+import React, { useEffect, useState, useContext, useRef } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom' // Use react-router-dom for Link
+import { AppContext } from '../Context/context' // Adjust path as necessary
 import {
   MoreVertical,
   Edit,
@@ -10,7 +10,7 @@ import {
   Send,
   Bookmark,
   ChevronLeft,
-} from "lucide-react"
+} from 'lucide-react'
 
 // Assuming your AppContext, getPostById, etc., are correctly implemented.
 // Icon components are now removed and replaced with Lucide React icons.
@@ -39,12 +39,12 @@ const PostById = () => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
 
-  const [editCaption, setEditCaption] = useState("")
+  const [editCaption, setEditCaption] = useState('')
   const [editMediaFile, setEditMediaFile] = useState(null)
   const [editPreview, setEditPreview] = useState(null)
   const editFileRef = useRef(null)
   const [editLoading, setEditLoading] = useState(false)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('')
 
   // Ref for the menu to handle clicks outside
   const menuRef = useRef(null)
@@ -56,8 +56,8 @@ const PostById = () => {
         setMenuOpen(false)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [menuRef])
 
   useEffect(() => {
@@ -69,7 +69,7 @@ const PostById = () => {
       if (result?.success) {
         const fetchedPost = result.data
         setPost(fetchedPost)
-        setEditCaption(fetchedPost?.caption || "")
+        setEditCaption(fetchedPost?.caption || '')
 
         const likes = fetchedPost?.likes || []
         const likedByUser =
@@ -77,8 +77,8 @@ const PostById = () => {
           Array.isArray(likes) &&
           likes.some(
             l =>
-              String(l) === String(user?._id) ||
-              String(l?._id) === String(user?._id)
+              String(l) === String(user?.id) ||
+              String(l?._id) === String(user?.id)
           )
         setIsLiked(Boolean(likedByUser))
         setLikesCount(Array.isArray(likes) ? likes.length : 0)
@@ -86,13 +86,13 @@ const PostById = () => {
         // **TODO: Implement and fetch isBookmarked state if a context function is available**
         // For now, keeping it as local state until logic is implemented.
       } else {
-        setMessage(result?.message || "Failed to load post")
+        setMessage(result?.message || 'Failed to load post')
       }
       setLoading(false)
     }
     load()
     return () => (mounted = false)
-  }, [postId, getPostById, user?._id])
+  }, [postId, getPostById, user?.id])
 
   // Double-click to like
   const handleMediaDblClick = async () => {
@@ -107,7 +107,7 @@ const PostById = () => {
 
   // Handle Like/Unlike Toggle
   const handleLikeToggle = async (forceLike = false) => {
-    if (!user) return navigate("/login") // Redirect if not logged in
+    if (!user) return navigate('/login') // Redirect if not logged in
 
     const actionIsLike = forceLike || !isLiked
 
@@ -121,7 +121,7 @@ const PostById = () => {
       const res = await addLikeAndRemoveLike(postId)
       if (res?.success) {
         setIsLiked(Boolean(res.data?.liked))
-        if (typeof res.data?.likesCount === "number") {
+        if (typeof res.data?.likesCount === 'number') {
           setLikesCount(res.data.likesCount)
         } else {
           // Fallback: refetch count
@@ -147,13 +147,13 @@ const PostById = () => {
       const res = await deletePost(post._id)
       setEditLoading(false)
       if (res?.success) {
-        navigate("/profile")
+        navigate('/profile')
       } else {
-        setMessage(res?.message || "Failed to delete")
+        setMessage(res?.message || 'Failed to delete')
       }
     } catch (err) {
       setEditLoading(false)
-      setMessage(err.message || "Error deleting")
+      setMessage(err.message || 'Error deleting')
     } finally {
       setShowDeleteConfirm(false)
       setMenuOpen(false)
@@ -179,7 +179,7 @@ const PostById = () => {
   const openEdit = () => {
     setShowEditModal(true)
     setMenuOpen(false)
-    setEditCaption(post?.caption || "")
+    setEditCaption(post?.caption || '')
     setEditMediaFile(null)
     setEditPreview(null)
   }
@@ -188,12 +188,12 @@ const PostById = () => {
     e.preventDefault()
     if (!post) return
     setEditLoading(true)
-    setMessage("")
+    setMessage('')
     try {
       const form = new FormData()
-      form.append("contentType", post.contentType || "image")
-      if (editMediaFile) form.append("media", editMediaFile)
-      form.append("caption", editCaption || "")
+      form.append('contentType', post.contentType || 'image')
+      if (editMediaFile) form.append('media', editMediaFile)
+      form.append('caption', editCaption || '')
 
       const res = await editPost(post._id, form)
       if (res?.success) {
@@ -212,10 +212,10 @@ const PostById = () => {
         }
         setShowEditModal(false)
       } else {
-        setMessage(res?.message || "Failed to edit post")
+        setMessage(res?.message || 'Failed to edit post')
       }
     } catch (err) {
-      setMessage(err.message || "Error editing post")
+      setMessage(err.message || 'Error editing post')
     } finally {
       setEditLoading(false)
     }
@@ -247,18 +247,18 @@ const PostById = () => {
   }
 
   // Determine if the post belongs to the current user
-  const isOwner = String(post.user?._id) === String(user?._id)
+  const isOwner = String(post.user?._id) === String(user?.id)
 
   // Format creation date
   const dateString = post.createdAt
     ? new Date(post.createdAt).toLocaleString(undefined, {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       })
-    : ""
+    : ''
 
   // --- Main Component JSX ---
   return (
@@ -280,19 +280,19 @@ const PostById = () => {
               className='flex items-center gap-3'
             >
               <img
-              src={
-                user?.profilePicture?.url ||
-                `https://ui-avatars.com/api/?name=${user.username}&background=random`
-              }
-              alt='Profile'
-              className='w-10 h-10 rounded-full object-cover border-4 border-black bg-gray-800'
-            />
+                src={
+                  user?.img ||
+                  `https://ui-avatars.com/api/?name=${user.username}&background=random`
+                }
+                alt='Profile'
+                className='w-10 h-10 rounded-full object-cover border-4 border-black bg-gray-800'
+              />
               <div>
                 <div className='font-bold text-sm md:text-base hover:text-orange-500 transition'>
                   {post.user?.username}
                 </div>
                 <div className='text-xs text-gray-400'>
-                  {post.user?.fullname || "Post Author"}
+                  {post.user?.fullname || 'Post Author'}
                 </div>
               </div>
             </Link>
@@ -336,7 +336,7 @@ const PostById = () => {
         <div
           className='relative w-full aspect-square bg-gray-950 flex items-center justify-center'
           onDoubleClick={handleMediaDblClick}
-          style={{ maxHeight: "85vh" }} // Limit height on desktop
+          style={{ maxHeight: '85vh' }} // Limit height on desktop
         >
           {showDblClickHeart && (
             <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'>
@@ -347,7 +347,7 @@ const PostById = () => {
               />
             </div>
           )}
-          {post.contentType === "video" ? (
+          {post.contentType === 'video' ? (
             <video
               src={post.media?.url}
               controls
@@ -371,15 +371,15 @@ const PostById = () => {
               <button
                 onClick={() => handleLikeToggle()}
                 className='p-1 rounded-full focus:outline-none transition'
-                aria-label={isLiked ? "Unlike Post" : "Like Post"}
+                aria-label={isLiked ? 'Unlike Post' : 'Like Post'}
               >
                 <Heart
                   className={`w-6 h-6 transition-colors duration-200 ${
                     isLiked
-                      ? "text-red-500 fill-red-500"
-                      : "text-gray-400 hover:text-white"
+                      ? 'text-red-500 fill-red-500'
+                      : 'text-gray-400 hover:text-white'
                   }`}
-                  fill={isLiked ? "currentColor" : "none"}
+                  fill={isLiked ? 'currentColor' : 'none'}
                 />
               </button>
               <span className='text-sm font-semibold text-gray-300'>
@@ -420,15 +420,15 @@ const PostById = () => {
           <button
             onClick={() => setIsBookmarked(v => !v)}
             className='p-1 rounded-full focus:outline-none transition'
-            aria-label={isBookmarked ? "Unsave Post" : "Save Post"}
+            aria-label={isBookmarked ? 'Unsave Post' : 'Save Post'}
           >
             <Bookmark
               className={`w-6 h-6 transition-colors duration-200 ${
                 isBookmarked
-                  ? "text-white fill-white"
-                  : "text-gray-400 hover:text-white"
+                  ? 'text-white fill-white'
+                  : 'text-gray-400 hover:text-white'
               }`}
-              fill={isBookmarked ? "currentColor" : "none"}
+              fill={isBookmarked ? 'currentColor' : 'none'}
             />
           </button>
         </div>
@@ -461,7 +461,7 @@ const PostById = () => {
                 {(post.comments || []).slice(0, 2).map((c, i) => (
                   <div key={i} className='text-sm flex leading-snug'>
                     <span className='font-semibold mr-2'>
-                      {c.user?.username || "Anonymous"}
+                      {c.user?.username || 'Anonymous'}
                     </span>
                     <span className='text-gray-300'>{c.text}</span>
                   </div>
@@ -501,7 +501,7 @@ const PostById = () => {
                 className='flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-50'
                 disabled={editLoading}
               >
-                {editLoading ? "Deleting..." : "Delete Permanently"}
+                {editLoading ? 'Deleting...' : 'Delete Permanently'}
               </button>
             </div>
           </div>
@@ -524,7 +524,7 @@ const PostById = () => {
                 </label>
                 <div className='w-full h-72 bg-black rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center'>
                   {editPreview || post.media?.url ? (
-                    post.contentType === "video" ? (
+                    post.contentType === 'video' ? (
                       <video
                         src={editPreview || post.media.url}
                         controls
@@ -604,7 +604,7 @@ const PostById = () => {
                   className='px-6 py-3 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-600 transition disabled:opacity-50'
                   disabled={editLoading}
                 >
-                  {editLoading ? "Saving..." : "Save Changes"}
+                  {editLoading ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
               {message && (

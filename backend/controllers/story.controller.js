@@ -1,12 +1,12 @@
-import Story from "../models/Story.js"
-import { cloudinary } from "../config/uploader.js"
+import Story from '../models/Story.js'
+import { cloudinary } from '../config/uploader.js'
 
 const uploadToCloudinary = (fileBuffer, contentType) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: contentType === "video" ? "video" : "image",
-        folder: "stories",
+        resource_type: contentType === 'video' ? 'video' : 'image',
+        folder: 'stories',
       },
       (err, result) => {
         if (err) return reject(err)
@@ -24,7 +24,7 @@ export const addStory = async (req, res) => {
     const { contentType, isCloseFriends } = req.body
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded!" })
+      return res.status(400).json({ message: 'No file uploaded!' })
     }
 
     const expiresAt = new Date()
@@ -37,7 +37,7 @@ export const addStory = async (req, res) => {
 
     const newStory = new Story({
       user: userId,
-      contentType: contentType || "image",
+      contentType: contentType || 'image',
       media: {
         public_id: cloudinaryResult.public_id,
         url: cloudinaryResult.secure_url,
@@ -50,10 +50,10 @@ export const addStory = async (req, res) => {
 
     return res
       .status(201)
-      .json({ message: "Story added for 24 hours", story: newStory })
+      .json({ message: 'Story added for 24 hours', story: newStory })
   } catch (err) {
     console.error(err)
-    return res.status(500).json({ message: "Server error" })
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -63,17 +63,17 @@ export const getMyStories = async (req, res) => {
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
     const stories = await Story.find({
-      user: req.userId, 
+      user: req.userId,
       createdAt: { $gte: twentyFourHoursAgo },
       expiresAt: { $gt: now },
     })
-      .populate("user", "username avatar")
+      .populate('user', 'username profilePicture')
       .sort({ createdAt: -1 })
 
     res.status(200).json({ success: true, stories })
   } catch (err) {
-    console.error("Error fetching user stories:", err)
-    res.status(500).json({ success: false, message: "Server error" })
+    console.error('Error fetching user stories:', err)
+    res.status(500).json({ success: false, message: 'Server error' })
   }
 }
 
@@ -83,21 +83,21 @@ export const deleteStory = async (req, res) => {
     const userId = req.userId
     const story = await Story.findById(storyId)
 
-    if (!story) return res.status(404).json({ message: "Story not found" })
+    if (!story) return res.status(404).json({ message: 'Story not found' })
 
     if (String(story.user) !== String(userId))
-      return res.status(403).json({ message: "Not authorized" })
+      return res.status(403).json({ message: 'Not authorized' })
 
     if (story.media.public_id) {
-      const type = story.contentType === "video" ? "video" : "image"
+      const type = story.contentType === 'video' ? 'video' : 'image'
       await cloudinary.uploader.destroy(story.media.public_id, {
         resource_type: type,
       })
     }
     await Story.findByIdAndDelete(storyId)
-    res.status(200).json({ message: "Story deleted successfully" })
+    res.status(200).json({ message: 'Story deleted successfully' })
   } catch (err) {
-    console.error("Error deleting story:", err)
-    res.status(500).json({ message: "Server error" })
+    console.error('Error deleting story:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 }

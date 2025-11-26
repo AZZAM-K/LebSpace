@@ -1,6 +1,6 @@
-import React, { useState, useContext, useEffect } from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { AppContext } from "../Context/context"
+import React, { useState, useContext, useEffect } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { AppContext } from '../Context/context'
 
 const AllCommentsPage = () => {
   const { postId } = useParams()
@@ -11,10 +11,10 @@ const AllCommentsPage = () => {
   const [post, setPost] = useState(null)
   const [comments, setComments] = useState([])
   const [loading, setLoading] = useState(true)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('')
   const [openMenuId, setOpenMenuId] = useState(null)
 
-  const [newComment, setNewComment] = useState("")
+  const [newComment, setNewComment] = useState('')
 
   const handleAddComment = async e => {
     e.preventDefault()
@@ -25,9 +25,9 @@ const AllCommentsPage = () => {
 
     if (res?.success) {
       setComments(prev => [...prev, res.data.comment])
-      setNewComment("")
+      setNewComment('')
     } else {
-      console.log("Error adding comment")
+      console.log('Error adding comment')
     }
   }
 
@@ -110,8 +110,8 @@ const AllCommentsPage = () => {
               >
                 <img
                   src={
-                    user?.profilePicture?.url ||
-                    `https://ui-avatars.com/api/?name=${user.username}&background=random`
+                    c.user?.profilePicture?.url ||
+                    `https://ui-avatars.com/api/?name=${c.user?.username}&background=random`
                   }
                   alt='Profile'
                   className='w-10 h-10 rounded-full object-cover border-4 border-black bg-gray-800'
@@ -127,16 +127,16 @@ const AllCommentsPage = () => {
 
                   <div className='flex items-center gap-6 text-xs text-gray-500 mt-2'>
                     <span>
-                      {new Date(c.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
+                      {new Date(c.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
                       })}
                     </span>
                   </div>
                 </div>
 
                 {/* 3 DOTS BUTTON */}
-                {user?._id === c.user?._id && (
+                {user?.id === c.user?._id && (
                   <div className='relative'>
                     <button
                       onClick={() =>
@@ -169,7 +169,7 @@ const AllCommentsPage = () => {
 
                             if (
                               res.success ||
-                              res.message === "Comment deleted successfully"
+                              res.message === 'Comment deleted successfully'
                             ) {
                               const fresh = await getCommentsByPostId(postId)
                               if (fresh?.success) {

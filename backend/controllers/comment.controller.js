@@ -1,5 +1,5 @@
-import Post from "../models/Post.js"
-import Comment from "../models/Comment.js"
+import Post from '../models/Post.js'
+import Comment from '../models/Comment.js'
 
 export const addComment = async (req, res) => {
   try {
@@ -7,15 +7,15 @@ export const addComment = async (req, res) => {
     const userId = req.userId
     const { content } = req.body
 
-    if (!content || content.trim() === "") {
+    if (!content || content.trim() === '') {
       return res
         .status(400)
-        .json({ message: "Comment content cannot be empty" })
+        .json({ message: 'Comment content cannot be empty' })
     }
 
     const post = await Post.findById(postId)
     if (!post) {
-      return res.status(404).json({ message: "Post not found" })
+      return res.status(404).json({ message: 'Post not found' })
     }
 
     const newComment = new Comment({
@@ -30,17 +30,17 @@ export const addComment = async (req, res) => {
     await post.save()
 
     const populatedComment = await Comment.findById(newComment._id).populate(
-      "user",
-      "username fullname profileImage"
+      'user',
+      'username fullname profilePicture'
     )
 
     return res.status(201).json({
-      message: "Comment added",
+      message: 'Comment added',
       comment: populatedComment,
     })
   } catch (error) {
-    console.error("Error adding comment:", error)
-    return res.status(500).json({ message: "Server error" })
+    console.error('Error adding comment:', error)
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -48,12 +48,12 @@ export const getCommentsByPostId = async (req, res) => {
   try {
     const { postId } = req.params
     const comments = await Comment.find({ post: postId })
-      .populate("user", "username fullname profileImage")
+      .populate('user', 'username fullname profilePicture')
       .sort({ createdAt: -1 })
     return res.status(200).json({ success: true, comments })
   } catch (error) {
-    console.error("Error fetching comments:", error)
-    return res.status(500).json({ message: "Server error" })
+    console.error('Error fetching comments:', error)
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -64,42 +64,42 @@ export const getCountOfComments = async (req, res) => {
 
     return res.status(200).json({ success: true, count })
   } catch (error) {
-    console.error("Error fetching comments count:", error)
-    return res.status(500).json({ message: "Server error" })
+    console.error('Error fetching comments count:', error)
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
 export const deleteComment = async (req, res) => {
   try {
-    const { commentId } = req.params;
-    const userId = req.userId; // من الـ authenticate
+    const { commentId } = req.params
+    const userId = req.userId // من الـ authenticate
 
-    const comment = await Comment.findById(commentId);
+    const comment = await Comment.findById(commentId)
     if (!comment) {
-      return res.status(404).json({ message: "Comment not found" });
+      return res.status(404).json({ message: 'Comment not found' })
     }
 
     // ❗ مهم جداً: السماح لصاحب البوست أو صاحب الكومنت فقط
-    const post = await Post.findById(comment.post);
+    const post = await Post.findById(comment.post)
 
-    if (comment.user.toString() !== userId.toString() &&
-        post.user.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Forbidden" });
+    if (
+      comment.user.toString() !== userId.toString() &&
+      post.user.toString() !== userId.toString()
+    ) {
+      return res.status(403).json({ message: 'Forbidden' })
     }
 
     // احذف الكومنت
-    await Comment.findByIdAndDelete(commentId);
+    await Comment.findByIdAndDelete(commentId)
 
     // شيل الكومنت من المصفوفة في بوست
     await Post.findByIdAndUpdate(comment.post, {
       $pull: { comments: commentId },
-    });
+    })
 
-    return res.json({ success: true, message: "Comment deleted" });
-
+    return res.json({ success: true, message: 'Comment deleted' })
   } catch (error) {
-    console.error("Delete comment error:", error);
-    return res.status(500).json({ message: "Server error" });
+    console.error('Delete comment error:', error)
+    return res.status(500).json({ message: 'Server error' })
   }
-};
-
+}
