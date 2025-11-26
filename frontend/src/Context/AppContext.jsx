@@ -1,20 +1,20 @@
-import { useState } from "react"
-import { AppContext } from "./context"
+import { useState } from 'react'
+import { AppContext } from './context'
 
 const AppContextProvider = props => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL
 
-  const [token, setToken] = useState(localStorage.getItem("token") || "")
+  const [token, setToken] = useState(localStorage.getItem('token') || '')
   const [user, setUser] = useState(() => {
     try {
-      const storedUser = localStorage.getItem("user")
-      if (!storedUser || storedUser === "undefined") {
+      const storedUser = localStorage.getItem('user')
+      if (!storedUser || storedUser === 'undefined') {
         return null
       }
       return JSON.parse(storedUser)
     } catch (error) {
-      console.error("Failed to parse user from localStorage:", error)
-      localStorage.removeItem("user")
+      console.error('Failed to parse user from localStorage:', error)
+      localStorage.removeItem('user')
       return null
     }
   })
@@ -37,7 +37,7 @@ const AppContextProvider = props => {
       const res = await fetch(
         `${backendUrl}/api/story/delete-story/${storyId}`,
         {
-          method: "DELETE",
+          method: 'DELETE',
           headers: { Authorization: token },
         }
       )
@@ -52,7 +52,7 @@ const AppContextProvider = props => {
   const addStory = async formData => {
     try {
       const res = await fetch(`${backendUrl}/api/story/add-story`, {
-        method: "POST",
+        method: 'POST',
         headers: { Authorization: token },
         body: formData,
       })
@@ -67,7 +67,7 @@ const AppContextProvider = props => {
   const addPost = async formData => {
     try {
       const res = await fetch(`${backendUrl}/api/post/add-post`, {
-        method: "POST",
+        method: 'POST',
         headers: { Authorization: token },
         body: formData,
       })
@@ -82,7 +82,7 @@ const AppContextProvider = props => {
   const editPost = async (postId, formData) => {
     try {
       const res = await fetch(`${backendUrl}/api/post/edit/${postId}`, {
-        method: "PUT",
+        method: 'PUT',
         headers: { Authorization: token },
         body: formData,
       })
@@ -97,7 +97,7 @@ const AppContextProvider = props => {
   const deletePost = async postId => {
     try {
       const res = await fetch(`${backendUrl}/api/post/delete/${postId}`, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: { Authorization: token },
       })
       const data = await res.json()
@@ -124,17 +124,17 @@ const AppContextProvider = props => {
   const signup = async formData => {
     try {
       const res = await fetch(`${backendUrl}/api/users/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
       const data = await res.json()
       if (!res.ok) return { success: false, message: data.message }
 
-      localStorage.setItem("token", data.token)
+      localStorage.setItem('token', data.token)
       setToken(data.token)
 
-      localStorage.setItem("user", JSON.stringify(data.user))
+      localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
 
       return { success: true }
@@ -146,17 +146,17 @@ const AppContextProvider = props => {
   const login = async formData => {
     try {
       const res = await fetch(`${backendUrl}/api/users/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       })
       const data = await res.json()
       if (!res.ok) return { success: false, message: data.message }
 
-      localStorage.setItem("token", data.token)
+      localStorage.setItem('token', data.token)
       setToken(data.token)
-
-      localStorage.setItem("user", JSON.stringify(data.user))
+      console.log(data.user)
+      localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
 
       return { success: true }
@@ -166,9 +166,9 @@ const AppContextProvider = props => {
   }
 
   const logout = () => {
-    localStorage.removeItem("token")
-    localStorage.removeItem("user")
-    setToken("")
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    setToken('')
     setUser(null)
   }
 
@@ -186,8 +186,7 @@ const AppContextProvider = props => {
       }
 
       const userData = data.data || data
-      setUser(userData)
-      localStorage.setItem("user", JSON.stringify(userData))
+      localStorage.setItem('user', JSON.stringify(userData))
 
       return { success: true, data: userData }
     } catch (error) {
@@ -198,14 +197,14 @@ const AppContextProvider = props => {
   const updateProfile = async formData => {
     try {
       const res = await fetch(`${backendUrl}/api/users/profile`, {
-        method: "PUT",
+        method: 'PUT',
         headers: { Authorization: token },
         body: formData,
       })
       const data = await res.json()
       if (!res.ok) return { success: false, message: data.message }
 
-      localStorage.setItem("user", JSON.stringify(data))
+      localStorage.setItem('user', JSON.stringify(data))
       setUser(data)
 
       return { success: true }
@@ -217,7 +216,7 @@ const AppContextProvider = props => {
   const addLikeAndRemoveLike = async postId => {
     try {
       const res = await fetch(`${backendUrl}/api/post/like/${postId}`, {
-        method: "POST",
+        method: 'POST',
         headers: { Authorization: token },
       })
       const data = await res.json()
@@ -261,9 +260,9 @@ const AppContextProvider = props => {
       const res = await fetch(
         `${backendUrl}/api/comment/add-comment/${postId}`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
-            "Content-Type": "application/json",
+            'Content-Type': 'application/json',
             Authorization: token,
           },
           body: JSON.stringify({ content }),
@@ -293,27 +292,23 @@ const AppContextProvider = props => {
     }
   }
 
-  const deleteComment = async (commentId) => {
-  try {
-    const res = await fetch(
-      `${backendUrl}/api/comment/delete/${commentId}`,
-      {
-        method: "DELETE",
+  const deleteComment = async commentId => {
+    try {
+      const res = await fetch(`${backendUrl}/api/comment/delete/${commentId}`, {
+        method: 'DELETE',
         headers: {
-          Authorization: token,   // جاهز وفيه Bearer
-        }
-      }
-    );
+          Authorization: token,
+        },
+      })
 
-    const data = await res.json();
-    if (!res.ok) return { success: false, message: data.message }
-    return { success: true, data };
-  } catch (error) {
-    console.error("Error deleting comment:", error);
-    return { success: false, message: "Server error" };
+      const data = await res.json()
+      if (!res.ok) return { success: false, message: data.message }
+      return { success: true, data }
+    } catch (error) {
+      console.error('Error deleting comment:', error)
+      return { success: false, message: 'Server error' }
+    }
   }
-};
-
 
   const getFollowers = async id => {
     try {

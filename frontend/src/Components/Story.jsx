@@ -1,7 +1,13 @@
-import React, { useState, useEffect, useContext, useCallback } from "react"
-import { AppContext } from "../Context/context"
-import { Link } from "react-router-dom"
-import { Flame, Send } from "lucide-react"
+import {
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+  useEffectEvent,
+} from 'react'
+import { AppContext } from '../Context/context'
+import { Link } from 'react-router-dom'
+import { Flame, Send } from 'lucide-react'
 
 const CloseIcon = () => (
   <svg
@@ -67,11 +73,7 @@ const StoryOverlay = ({
   const duration = 5000
   const story = stories[currentIndex]
 
-  if (!user || !token) {
-    return <div style={{ color: "white" }}>Loading...</div>
-  }
-
-  useEffect(() => {
+  const storiesEvent = useEffectEvent(() => {
     setProgress(0)
     let interval
     if (story) {
@@ -91,7 +93,15 @@ const StoryOverlay = ({
       }, updateIntervalMs)
     }
     return () => clearInterval(interval)
+  })
+
+  useEffect(() => {
+    storiesEvent()
   }, [currentIndex, duration, onNext, story])
+
+  if (!user || !token) {
+    return <div style={{ color: 'white' }}>Loading...</div>
+  }
 
   if (!story) return null
 
@@ -119,13 +129,13 @@ const StoryOverlay = ({
       setMenuOpen(false)
       onClose()
     } else {
-      alert("Failed to delete story: " + result.message)
+      alert('Failed to delete story: ' + result.message)
     }
   }
-  console.log("Story user:", story?.user?._id)
-  console.log("Logged user:", user?._id)
+  console.log('Story user:', story?.user?._id)
+  console.log('Logged user:', user?._id)
   console.log(
-    "Same user?",
+    'Same user?',
     story?.user?._id?.toString() === user?._id?.toString()
   )
 
@@ -148,13 +158,13 @@ const StoryOverlay = ({
                 className='h-1 bg-white rounded-full'
                 style={
                   index < currentIndex
-                    ? { width: "100%" }
+                    ? { width: '100%' }
                     : index === currentIndex
                     ? {
                         width: `${progress}%`,
-                        transition: "width 0.05s linear",
+                        transition: 'width 0.05s linear',
                       }
-                    : { width: "0%" }
+                    : { width: '0%' }
                 }
               />
             </div>
@@ -286,81 +296,81 @@ const StoryOverlay = ({
 
 const otherStories = [
   {
-    userId: "67240128aa12bc1f9a3f0011",
-    username: "ahmad",
-    userProfile: "https://i.pravatar.cc/150?u=ahmad",
+    userId: '67240128aa12bc1f9a3f0011',
+    username: 'ahmad',
+    userProfile: 'https://i.pravatar.cc/150?u=ahmad',
     stories: [
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d",
-        createdAt: "2024-11-25T09:30:00Z",
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1503023345310-bd7c1de61c7d',
+        createdAt: '2024-11-25T09:30:00Z',
       },
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee",
-        createdAt: "2024-11-25T10:10:00Z",
-      },
-    ],
-  },
-
-  {
-    userId: "67240128aa12bc1f9a3f0022",
-    username: "mohamed",
-    userProfile: "https://i.pravatar.cc/150?u=mohamed",
-    stories: [
-      {
-        type: "video",
-        url: "https://www.w3schools.com/html/mov_bbb.mp4",
-        createdAt: "2024-11-25T08:00:00Z",
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee',
+        createdAt: '2024-11-25T10:10:00Z',
       },
     ],
   },
 
   {
-    userId: "67240128aa12bc1f9a3f0033",
-    username: "sara",
-    userProfile: "https://i.pravatar.cc/150?u=sara",
+    userId: '67240128aa12bc1f9a3f0022',
+    username: 'mohamed',
+    userProfile: 'https://i.pravatar.cc/150?u=mohamed',
     stories: [
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-        createdAt: "2024-11-25T11:45:00Z",
+        type: 'video',
+        url: 'https://www.w3schools.com/html/mov_bbb.mp4',
+        createdAt: '2024-11-25T08:00:00Z',
+      },
+    ],
+  },
+
+  {
+    userId: '67240128aa12bc1f9a3f0033',
+    username: 'sara',
+    userProfile: 'https://i.pravatar.cc/150?u=sara',
+    stories: [
+      {
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f',
+        createdAt: '2024-11-25T11:45:00Z',
       },
     ],
   },
   {
-    userId: "67240128aa12bc1f9a3f0033",
-    username: "sara",
-    userProfile: "https://i.pravatar.cc/150?u=sara",
+    userId: '67240128aa12bc1f9a3f0030',
+    username: 'sara',
+    userProfile: 'https://i.pravatar.cc/150?u=sara',
     stories: [
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-        createdAt: "2024-11-25T11:45:00Z",
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f',
+        createdAt: '2024-11-25T11:45:00Z',
       },
     ],
   },
   {
-    userId: "67240128aa12bc1f9a3f0033",
-    username: "sara",
-    userProfile: "https://i.pravatar.cc/150?u=sara",
+    userId: '67240128aa12bc1f9a3f0034',
+    username: 'sara',
+    userProfile: 'https://i.pravatar.cc/150?u=sara',
     stories: [
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-        createdAt: "2024-11-25T11:45:00Z",
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f',
+        createdAt: '2024-11-25T11:45:00Z',
       },
     ],
   },
   {
-    userId: "67240128aa12bc1f9a3f0033",
-    username: "sara",
-    userProfile: "https://i.pravatar.cc/150?u=sara",
+    userId: '67240128aa12bc1f9a3f0035',
+    username: 'sara',
+    userProfile: 'https://i.pravatar.cc/150?u=sara',
     stories: [
       {
-        type: "image",
-        url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f",
-        createdAt: "2024-11-25T11:45:00Z",
+        type: 'image',
+        url: 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f',
+        createdAt: '2024-11-25T11:45:00Z',
       },
     ],
   },
@@ -386,12 +396,12 @@ const Story = () => {
       } else {
         const fetchedStories = data.stories || []
 
-        const currentUserId = user?._id || user?.id || user
+        const currentUserId = user?.id || user?.id || user
 
         const myStories = fetchedStories.filter(story => {
           const storyUserId =
             story?.user?._id ||
-            (typeof story?.user === "string" ? story.user : undefined) ||
+            (typeof story?.user === 'string' ? story.user : undefined) ||
             story?.user
 
           if (!storyUserId || !currentUserId) return false
@@ -402,7 +412,7 @@ const Story = () => {
         setAllStories(myStories)
       }
     } catch (err) {
-      console.error("Fetch error:", err)
+      console.error('Fetch error:', err)
       setUserStory(null)
       setAllStories([])
     } finally {
@@ -448,15 +458,15 @@ const Story = () => {
                 onClick={openStory}
                 className={`relative w-16 h-16 rounded-full p-0.5 cursor-pointer ${
                   activeIndex === -1
-                    ? "bg-gray-500" 
+                    ? 'bg-gray-500'
                     : activeIndex === -1
-                    ? "bg-gray-500" 
-                    : "bg-linear-to-tr from-yellow-400 via-orange-500 to-red-600" 
+                    ? 'bg-gray-500'
+                    : 'bg-linear-to-tr from-yellow-400 via-orange-500 to-red-600'
                 }`}
               >
                 <img
                   src={
-                    user?.profilePicture?.url ||
+                    user.img ||
                     `https://ui-avatars.com/api/?name=${user.username}&background=random`
                   }
                   alt='Profile'
@@ -468,7 +478,7 @@ const Story = () => {
                 <div className='relative w-16 h-16 sm:w-16 mx-auto rounded-full p-0.5 border-2 border-gray-500 cursor-pointer'>
                   <img
                     src={
-                      user?.profilePicture?.url ||
+                      user.img ||
                       `https://ui-avatars.com/api/?name=${user.username}&background=random`
                     }
                     alt='Profile'
@@ -485,14 +495,14 @@ const Story = () => {
               Your Story
             </p>
           </div>
-          {otherStories?.map((story, index) => (
+          {otherStories?.map(story => (
             <div
               key={story.userId}
               className='flex flex-col items-center w-16 shrink-0'
             >
               <div
-                onClick={() => openOtherStory(index)}
-                className='relative w-16 h-16 rounded-full p-0.5 bg-linear-to-tr from-yellow-400 via-pink-500 to-purple-600 cursor-pointer'
+                className='relative w-16 h-16 rounded-full p-0.5 bg-linear-to-tr from-yellow-400 via-pink-500
+               to-purple-600 cursor-pointer'
               >
                 <img
                   src={

@@ -11,7 +11,7 @@ export const signUp = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: "Username or email already exists" })
+        .json({ message: 'Username or email already exists' })
     }
     const hashedPassword = await bcrypt.hash(password, 10)
     const newUser = new User({
@@ -25,12 +25,14 @@ export const signUp = async (req, res) => {
     await newUser.save()
     const token = generateToken(newUser._id)
     res.status(201).json({
-      id: newUser._id,
-      username: newUser.username,
-      fullName: newUser.fullName,
-      bio: newUser.bio,
-      email: newUser.email,
-      img: newUser.profilePicture.url,
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        fullName: newUser.fullName,
+        bio: newUser.bio,
+        email: newUser.email,
+        img: newUser.profilePicture.url,
+      },
       token: `Bearer ${token}`,
     })
   } catch (error) {
@@ -43,20 +45,22 @@ export const login = async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({ email })
     if (!user) {
-      return res.status(400).json({ message: "Email not found" })
+      return res.status(400).json({ message: 'Email not found' })
     }
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.status(400).json({ message: "Incorrect password" })
+      return res.status(400).json({ message: 'Incorrect password' })
     }
     const token = generateToken(user._id)
     res.status(200).json({
-      id: user._id,
-      username: user.username,
-      fullName: user.fullName,
-      bio: user.bio,
-      email: user.email,
-      img: user.profilePicture.url,
+      user: {
+        id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+        bio: user.bio,
+        email: user.email,
+        img: user.profilePicture.url,
+      },
       token: `Bearer ${token}`,
     })
   } catch (error) {
@@ -66,13 +70,13 @@ export const login = async (req, res) => {
 
 export const getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select("-password").populate({
-      path: "posts",
-      select: "media likes comments createdAt updatedAt",
+    const user = await User.findById(req.userId).select('-password').populate({
+      path: 'posts',
+      select: 'media likes comments createdAt updatedAt',
     })
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: 'User not found' })
     }
     res.status(200).json(user)
   } catch (error) {
@@ -85,7 +89,7 @@ export const updateProfile = async (req, res) => {
     const { username, fullName, bio } = req.body
     const user = await User.findById(req.userId)
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: 'User not found' })
     }
 
     const usernameExist = await User.findOne({
@@ -93,17 +97,17 @@ export const updateProfile = async (req, res) => {
       _id: { $ne: req.userId },
     })
     if (usernameExist) {
-      return res.status(400).json({ message: "Username already taken" })
+      return res.status(400).json({ message: 'Username already taken' })
     }
 
     if (req.file) {
       try {
         const uploadResult = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { resource_type: "auto" },
+            { resource_type: 'auto' },
             (error, result) => {
               if (error) {
-                reject(new Error("Failed to upload avatar: " + error.message))
+                reject(new Error('Failed to upload avatar: ' + error.message))
               } else {
                 resolve(result)
               }
@@ -117,7 +121,7 @@ export const updateProfile = async (req, res) => {
             await cloudinary.uploader.destroy(user.profilePicture.public_id)
           } catch (deleteError) {
             res.status(500).json({
-              message: "Failed to delete old avatar: " + deleteError.message,
+              message: 'Failed to delete old avatar: ' + deleteError.message,
             })
           }
         }
