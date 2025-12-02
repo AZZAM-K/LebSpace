@@ -1,6 +1,12 @@
-import { useEffect, useState, useContext, useRef } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom'
-import { AppContext } from '../Context/context'
+import React, {
+  useEffect,
+  useState,
+  useContext,
+  useRef,
+  useCallback,
+} from "react"
+import { useParams, useNavigate, Link } from "react-router-dom"
+import { AppContext } from "../Context/context"
 import {
   MoreVertical,
   Edit,
@@ -10,78 +16,111 @@ import {
   Send,
   Bookmark,
   ChevronLeft,
-} from 'lucide-react'
+  AlertCircle,
+  Loader,
+} from "lucide-react"
 
 const PostById = () => {
   const { postId } = useParams()
   const navigate = useNavigate()
-
   const {
     getPostById,
     editPost,
     deletePost,
     addLikeAndRemoveLike,
-    getCountOfLikes,
+    savePost,
     user,
+    setUser,
   } = useContext(AppContext)
 
   const [post, setPost] = useState(null)
   const [loading, setLoading] = useState(true)
   const [isLiked, setIsLiked] = useState(false)
-  const [isBookmarked, setIsBookmarked] = useState(false) // Assuming a bookmark function exists in context
+  const [saving, setSaving] = useState(false)
+  const [isBookmarked, setIsBookmarked] = useState(false)
   const [showDblClickHeart, setShowDblClickHeart] = useState(false)
   const [likesCount, setLikesCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-
-  const [editCaption, setEditCaption] = useState('')
+  const [editCaption, setEditCaption] = useState("")
   const [editMediaFile, setEditMediaFile] = useState(null)
   const [editPreview, setEditPreview] = useState(null)
-  const editFileRef = useRef(null)
   const [editLoading, setEditLoading] = useState(false)
-  const [message, setMessage] = useState('')
+  const [message, setMessage] = useState("")
+  const [messageType, setMessageType] = useState("error")
 
   const menuRef = useRef(null)
+  const editFileRef = useRef(null)
+
+  const handleSave = async () => {
+    if (!user) return navigate("/login")
+    if (saving) return
+
+    const willBookmark = !isBookmarked
+    setIsBookmarked(willBookmark)
+    setSaving(true)
+
+    try {
+      const res = await savePost(postId)
+
+      if (res?.success) {
+        let updatedSavedPosts = [...(user.savedPosts || [])]
+        if (willBookmark) updatedSavedPosts.push(postId)
+        else updatedSavedPosts = updatedSavedPosts.filter(id => id !== postId)
+
+        setUser(prev => ({ ...prev, savedPosts: updatedSavedPosts }))
+
+        setMessage(res.data?.message || (willBookmark ? "Saved" : "Removed"))
+        setMessageType("success")
+      } else {
+        setIsBookmarked(!willBookmark)
+        setMessage(res?.message || "Failed to save")
+        setMessageType("error")
+      }
+    } catch (err) {
+      setIsBookmarked(!willBookmark)
+      setMessage("Error saving post")
+      setMessageType("error")
+    } finally {
+      setSaving(false)
+    }
+  }
 
   useEffect(() => {
-    function handleClickOutside(event) {
+    const handleClickOutside = event => {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
         setMenuOpen(false)
       }
     }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [menuRef])
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   useEffect(() => {
     let mounted = true
-    const load = async () => {
-      setLoading(true)
-      const result = await getPostById(postId)
-      if (!mounted) return
-      if (result?.success) {
-        const fetchedPost = result.data
-        setPost(fetchedPost)
-        setEditCaption(fetchedPost?.caption || '')
+    const loadPost = async () => {
+      try {
+        setLoading(true)
+        const result = await getPostById(postId)
+        if (!mounted) return
 
-        const likes = fetchedPost?.likes || []
-        const likedByUser =
-          !!user &&
-          Array.isArray(likes) &&
-          likes.some(
-            l =>
-              String(l) === String(user?.id) ||
-              String(l?._id) === String(user?.id)
+        if (result?.success) {
+          const fetchedPost = result.data
+          setPost(fetchedPost)
+          setEditCaption(fetchedPost?.caption || "")
+          const likes = fetchedPost?.likes || []
+          const currentUserLiked = likes.some(
+            l => String(l?._id || l) === String(user?._id || user?.id)
           )
         setIsLiked(Boolean(likedByUser))
         setLikesCount(Array.isArray(likes) ? likes.length : 0)
       } else {
         setMessage(result?.message || 'Failed to load post')
       }
-      setLoading(false)
     }
-    load()
+
+    loadPost()
     return () => (mounted = false)
   }, [postId, getPostById, user?.id, user])
 
@@ -117,33 +156,35 @@ const PostById = () => {
       } else {
         setIsLiked(prevLiked)
         setLikesCount(prevCount)
+        setMessage("Error updating like")
+        setMessageType("error")
       }
-    } catch (err) {
-      setIsLiked(prevLiked)
-      setLikesCount(prevCount)
-    }
-  }
+    },
+    [isLiked, likesCount, user, postId, addLikeAndRemoveLike, navigate]
+  )
 
-  const toggleMenu = () => setMenuOpen(v => !v)
-
-  const confirmDelete = async () => {
+  const confirmDelete = useCallback(async () => {
+    if (!post?._id) return
     setEditLoading(true)
     try {
       const res = await deletePost(post._id)
-      setEditLoading(false)
       if (res?.success) {
-        navigate('/profile')
+        setMessage("Post deleted successfully")
+        setMessageType("success")
+        setTimeout(() => navigate("/profile"), 1500)
       } else {
-        setMessage(res?.message || 'Failed to delete')
+        setMessage(res?.message || "Failed to delete post")
+        setMessageType("error")
       }
     } catch (err) {
-      setEditLoading(false)
-      setMessage(err.message || 'Error deleting')
+      setMessage(err.message || "Error deleting post")
+      setMessageType("error")
     } finally {
+      setEditLoading(false)
       setShowDeleteConfirm(false)
       setMenuOpen(false)
     }
-  }
+  }, [post?._id, deletePost, navigate])
 
   useEffect(() => {
     if (!editMediaFile) {
@@ -156,12 +197,11 @@ const PostById = () => {
   }, [editMediaFile])
 
   const handleEditFileChange = e => {
-    const f = e.target.files?.[0]
-    if (!f) return
-    setEditMediaFile(f)
+    const file = e.target.files?.[0]
+    if (file) setEditMediaFile(file)
   }
 
-  const openEdit = () => {
+  const openEdit = useCallback(() => {
     setShowEditModal(true)
     setMenuOpen(false)
     setEditCaption(post?.caption || '')
@@ -193,34 +233,65 @@ const PostById = () => {
               media: { ...(prev.media || {}), url: editPreview },
             }))
           }
+        } else {
+          setMessage(res?.message || "Failed to edit post")
+          setMessageType("error")
         }
-        setShowEditModal(false)
-      } else {
-        setMessage(res?.message || 'Failed to edit post')
+      } catch (err) {
+        setMessage(err.message || "Error editing post")
+        setMessageType("error")
+      } finally {
+        setEditLoading(false)
       }
-    } catch (err) {
-      setMessage(err.message || 'Error editing post')
-    } finally {
-      setEditLoading(false)
-    }
-  }
+    },
+    [post, editPost, editCaption, editMediaFile]
+  )
+  useEffect(() => {
+    if (!user || !postId) return
+
+    setIsBookmarked(user?.savedPosts?.includes(postId))
+  }, [user, postId])
+
+  const isOwner = String(post?.user?._id) === String(user?._id || user?.id)
+
+  const dateString = post?.createdAt
+    ? new Date(post.createdAt).toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : ""
+
+  const userProfileUrl =
+    post?.user?.profilePicture?.url ||
+    post?.user?.img ||
+    `https://ui-avatars.com/api/?name=${post?.user?.username}&background=random`
 
   if (loading) {
     return (
-      <div className='min-h-screen flex justify-center items-center bg-gray-950'>
-        <div className='w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin' />
+      <div className='min-h-screen flex justify-center items-center bg-gray-900'>
+        <div className='flex flex-col items-center gap-3'>
+          <Loader className='w-10 h-10 animate-spin text-orange-500' />
+          <p className='text-gray-400'>Loading post...</p>
+        </div>
       </div>
     )
   }
 
   if (!post) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-gray-950 text-red-400'>
-        <div className='text-center'>
-          <p className='font-bold text-xl'>404 — Post not found</p>
+      <div className='min-h-screen flex items-center justify-center bg-gray-900'>
+        <div className='text-center bg-gray-800 p-8 rounded-lg border border-gray-700'>
+          <AlertCircle className='w-12 h-12 text-red-400 mx-auto mb-3' />
+          <p className='font-bold text-xl text-red-400 mb-2'>Post not found</p>
+          <p className='text-gray-400 mb-4'>
+            This post may have been deleted or you don't have access to it.
+          </p>
           <button
             onClick={() => navigate(-1)}
-            className='mt-4 px-4 py-2 bg-gray-800 rounded-lg hover:bg-gray-700 transition'
+            className='px-4 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition font-medium'
           >
             Go Back
           </button>
@@ -248,29 +319,26 @@ const PostById = () => {
           <div className='flex items-center'>
             <button
               onClick={() => navigate(-1)}
-              className='mr-3 p-1 rounded-full hover:bg-white/10 transition md:hidden'
+              className='p-1 rounded-full hover:bg-white/10 transition md:hidden'
               aria-label='Go Back'
             >
-              <ChevronLeft className='w-6 h-6 text-white' />
+              <ChevronLeft className='w-6 h-6' />
             </button>
             <Link
-              to={`/profile/${post.user?.username || post.user?._id}`}
-              className='flex items-center gap-3'
+              to={isOwner ? "/profile" : `/users/${post.user?._id}`}
+              className='flex items-center gap-3 hover:opacity-80 transition'
             >
               <img
-                src={
-                  user?.img ||
-                  `https://ui-avatars.com/api/?name=${user.username}&background=random`
-                }
-                alt='Profile'
-                className='w-10 h-10 rounded-full object-cover border-4 border-black bg-gray-800'
+                src={userProfileUrl}
+                alt={post.user?.username}
+                className='w-10 h-10 rounded-full object-cover border-2 border-orange-500'
               />
               <div>
-                <div className='font-bold text-sm md:text-base hover:text-orange-500 transition'>
+                <div className='font-bold text-sm md:text-base'>
                   {post.user?.username}
                 </div>
                 <div className='text-xs text-gray-400'>
-                  {post.user?.fullname || 'Post Author'}
+                  {post.user?.fullname || "User"}
                 </div>
               </div>
             </Link>
@@ -279,29 +347,29 @@ const PostById = () => {
           {isOwner && (
             <div className='relative' ref={menuRef}>
               <button
-                onClick={toggleMenu}
+                onClick={() => setMenuOpen(!menuOpen)}
                 className='p-2 rounded-full hover:bg-white/5 transition'
-                aria-label='Post Options Menu'
+                aria-label='Post Options'
               >
                 <MoreVertical className='w-6 h-6 text-gray-300' />
               </button>
 
               {menuOpen && (
-                <div className='absolute right-0 top-10 mt-2 w-40 bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-40'>
+                <div className='absolute right-0 top-10 w-44 bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-40'>
                   <button
-                    className='w-full text-left px-4 py-3 text-sm hover:bg-white/10 flex items-center gap-2'
                     onClick={openEdit}
+                    className='w-full text-left px-4 py-3 text-sm hover:bg-white/10 flex items-center gap-2 transition'
                   >
-                    <Edit className='w-4 h-4' /> Edit
+                    <Edit className='w-4 h-4' /> Edit Post
                   </button>
                   <button
-                    className='w-full text-left px-4 py-3 text-sm hover:bg-white/10 flex items-center gap-2 text-red-400'
                     onClick={() => {
                       setShowDeleteConfirm(true)
                       setMenuOpen(false)
                     }}
+                    className='w-full text-left px-4 py-3 text-sm hover:bg-white/10 flex items-center gap-2 text-red-400 transition'
                   >
-                    <Trash2 className='w-4 h-4' /> Delete
+                    <Trash2 className='w-4 h-4' /> Delete Post
                   </button>
                 </div>
               )}
@@ -310,32 +378,36 @@ const PostById = () => {
         </div>
 
         <div
-          className='relative w-full aspect-square bg-gray-950 flex items-center justify-center'
+          className='relative w-full aspect-square bg-gray-900 flex items-center justify-center overflow-hidden'
           onDoubleClick={handleMediaDblClick}
           style={{ maxHeight: '85vh' }}
         >
           {showDblClickHeart && (
-            <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'>
+            <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20 bg-black/20'>
               <Heart
-                className='w-24 h-24 text-red-500 animate-pop-in'
+                className='w-24 h-24 text-orange-500 animate-bounce'
                 fill='currentColor'
-                strokeWidth={1.5}
               />
             </div>
           )}
-          {post.contentType === 'video' ? (
-            <video
-              src={post.media?.url}
-              controls
-              className='w-full h-full object-contain'
-              preload='metadata'
-            />
+
+          {post.media?.url ? (
+            post.contentType === "video" ? (
+              <video
+                src={post.media.url}
+                controls
+                className='w-full h-full object-contain'
+                preload='metadata'
+              />
+            ) : (
+              <img
+                src={post.media.url}
+                alt='Post content'
+                className='w-full h-full object-cover'
+              />
+            )
           ) : (
-            <img
-              src={post.media?.url}
-              alt='post media'
-              className='w-full h-full object-cover'
-            />
+            <div className='text-gray-500'>No media available</div>
           )}
         </div>
 
@@ -364,42 +436,34 @@ const PostById = () => {
             <div className='flex items-center gap-1'>
               <Link
                 to={`/post/${post._id}/add-comment`}
-                className='p-1 rounded-full focus:outline-none'
-                aria-label='Add a Comment'
+                className='p-2 hover:bg-white/10 rounded-full transition'
+                aria-label='Comment'
               >
-                <MessageCircle
-                  className='w-6 h-6 text-gray-400 hover:text-white transition-colors duration-200'
-                  strokeWidth={2}
-                />
+                <MessageCircle className='w-6 h-6 text-gray-300' />
               </Link>
-              <span className='text-sm font-semibold text-gray-300'>
-                {post.comments?.length || 0}
-              </span>
-            </div>
+            </button>
 
             <button
-              className='p-1 rounded-full focus:outline-none'
-              aria-label='Share Post'
+              className='p-2 hover:bg-white/10 rounded-full transition'
+              aria-label='Send'
             >
-              <Send
-                className='w-6 h-6 text-gray-400 hover:text-white transition-colors duration-200'
-                strokeWidth={2}
-              />
+              <Send className='w-6 h-6 text-gray-300' />
             </button>
           </div>
 
           <button
-            onClick={() => setIsBookmarked(v => !v)}
-            className='p-1 rounded-full focus:outline-none transition'
-            aria-label={isBookmarked ? 'Unsave Post' : 'Save Post'}
+            onClick={handleSave}
+            className='p-2 hover:bg-white/10 rounded-full transition'
+            aria-label='Save'
           >
             <Bookmark
-              className={`w-6 h-6 transition-colors duration-200 ${
+              fill='currentColor'
+              strokeWidth={2}
+              className={`w-6 h-6 transition ${
                 isBookmarked
-                  ? 'text-white fill-white'
-                  : 'text-gray-400 hover:text-white'
+                  ? "text-orange-500 fill-orange-500"
+                  : "text-gray-300"
               }`}
-              fill={isBookmarked ? 'currentColor' : 'none'}
             />
           </button>
         </div>
@@ -444,7 +508,6 @@ const PostById = () => {
             {dateString}
           </div>
         </div>
-      </div>
 
       {showDeleteConfirm && (
         <div className='fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm'>
@@ -509,31 +572,74 @@ const PostById = () => {
                   )}
                 </div>
 
-                <div className='mt-4 flex gap-3'>
+        {showEditModal && (
+          <div className='fixed inset-0 flex items-center justify-center z-50 bg-black/50'>
+            <div className='bg-gray-900 rounded-lg p-6 w-96 border border-gray-700'>
+              <h2 className='text-lg font-bold mb-4'>Edit Post</h2>
+              <form onSubmit={submitEdit} className='flex flex-col gap-4'>
+                <textarea
+                  value={editCaption}
+                  onChange={e => setEditCaption(e.target.value)}
+                  placeholder='Write a caption...'
+                  className='bg-gray-800 text-white p-2 rounded-lg border border-gray-700 resize-none'
+                  rows={3}
+                />
+
+                <div className='flex items-center gap-2'>
                   <input
-                    ref={editFileRef}
                     type='file'
-                    accept='image/*,video/*'
+                    ref={editFileRef}
                     onChange={handleEditFileChange}
-                    className='hidden'
+                    accept='image/*,video/*'
+                    className='text-sm text-gray-400'
                   />
+                  {editPreview && (
+                    <div className='w-16 h-16 border border-gray-700 rounded-lg overflow-hidden'>
+                      {editMediaFile?.type.startsWith("video") ? (
+                        <video
+                          src={editPreview}
+                          className='w-full h-full object-cover'
+                          muted
+                          loop
+                          autoPlay
+                        />
+                      ) : (
+                        <img
+                          src={editPreview}
+                          alt='Preview'
+                          className='w-full h-full object-cover'
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {message && (
+                  <p
+                    className={`text-sm ${
+                      messageType === "error"
+                        ? "text-red-400"
+                        : "text-green-400"
+                    }`}
+                  >
+                    {message}
+                  </p>
+                )}
+
+                <div className='flex justify-end gap-3'>
                   <button
                     type='button'
-                    onClick={() => editFileRef.current?.click()}
-                    className='px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition font-medium'
+                    onClick={() => setShowEditModal(false)}
+                    className='px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition'
                   >
-                    Change Media
+                    Cancel
                   </button>
                   <button
-                    type='button'
-                    onClick={() => {
-                      setEditMediaFile(null)
-                      setEditPreview(null)
-                      if (editFileRef.current) editFileRef.current.value = null
-                    }}
-                    className='px-4 py-2 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition font-medium'
+                    type='submit'
+                    disabled={editLoading}
+                    className='px-3 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition disabled:opacity-50'
                   >
-                    Remove
+                    {editLoading ? "Saving..." : "Save"}
                   </button>
                 </div>
               </div>
@@ -580,8 +686,8 @@ const PostById = () => {
               )}
             </form>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }

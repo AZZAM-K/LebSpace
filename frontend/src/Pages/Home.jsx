@@ -1,11 +1,17 @@
-import SideBar2 from '../Components/SideBar2'
-import Story from '../Components/Story'
+import SideBar2 from "../Components/SideBar2"
+import Story from "../Components/Story"
+import HomePage from "../Components/HomePage"
 
+// ...existing code...
 const Home = () => {
   return (
-    <div className='flex flex-1 flex-col md:flex-row p-4 md:p-8 gap-6 pb-24 md:pb-8 overflow-y-auto dark:bg-gray-900/40'>
-      <div className='w-90 md:w-full px-2 sm:px-4 md:max-w-7xl mx-auto'>
+    <div className="pb-30 md:flex md:justify-center md:gap-6 lg:gap-8 px-2 sm:px-4">
+      <div className='w-full  px-2 sm:px-4 md:max-w-7xl md:mx-auto'>
         <Story />
+
+        <div className='mt-6'>
+          <HomePage />
+        </div>
       </div>
 
       <div className='hidden lg:block w-[300px] shrink-0'>
@@ -14,5 +20,6 @@ const Home = () => {
     </div>
   )
 }
+// ...existing code...
 
 export default Home
