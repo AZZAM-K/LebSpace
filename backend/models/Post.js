@@ -22,10 +22,6 @@ const PostSchema = new mongoose.Schema(
 
     caption: { type: String, default: '' },
 
-    hashtags: [{ type: String, index: true }],
-
-    taggedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
-
     likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
   },

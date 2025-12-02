@@ -32,7 +32,6 @@ const Notifications = () => {
     if (!result.success) {
       setError(result.message || 'Failed to load notifications')
     }
-    console.log(result)
     setNotifications(result.data.notifications)
     setLoading(false)
   })
@@ -195,12 +194,18 @@ const Notifications = () => {
                       </Link>
 
                       <span className='text-gray-400'>
-                        {n.type === 'like' && 'liked your post.'}
-                        {n.type === 'comment' && `commented: "${n.message}"`}
-                        {n.type === 'message' &&
-                          `sent you a message: "${n.message}"`}
+                        {n.type === 'like' && 'liked your '}
+                        {n.type === 'comment' && 'commented on your '}
                         {n.type === 'follow' && 'started following you.'}
                       </span>
+                      {(n.type === 'like' || n.type === 'comment') && (
+                        <Link
+                          to={`/post/${n.post}`}
+                          className='text-orange-500 font-bold'
+                        >
+                          post
+                        </Link>
+                      )}
                     </div>
                     <span className='text-xs text-gray-600 font-medium mt-0.5'>
                       {new Date(n.createdAt).toLocaleString()}
@@ -242,15 +247,6 @@ const Notifications = () => {
                   </div>
 
                   <div className='flex items-center gap-3'>
-                    {/* Post Thumbnail (For Likes/Comments) */}
-                    {/* {n.post && (
-                      <img
-                        src={n.post.image}
-                        alt='Post context'
-                        className='w-10 h-10 rounded-md object-cover border border-gray-800 opacity-80 hover:opacity-100 transition-opacity cursor-pointer'
-                      />
-                    )} */}
-
                     {n.type !== 'request' && (
                       <button
                         onClick={() => handleDelete(n._id)}

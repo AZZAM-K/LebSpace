@@ -54,7 +54,8 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
-              className='w-full px-4 py-3 bg-gray-700/50 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-400'
+              className='w-full px-4 py-3 bg-gray-700/50 text-white border border-gray-600 rounded-lg focus:outline-none
+               focus:ring-2 focus:ring-white placeholder-gray-400'
             />
 
             <input
@@ -64,12 +65,14 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
-              className='w-full px-4 py-3 bg-gray-700/50 text-white border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-white placeholder-gray-400'
+              className='w-full px-4 py-3 bg-gray-700/50 text-white border border-gray-600 rounded-lg focus:outline-none
+               focus:ring-2 focus:ring-white placeholder-gray-400'
             />
 
             <button
               type='submit'
-              className='w-full py-3 mt-6 font-bold rounded-lg text-black bg-linear-to-r from-orange-600 to-orange-500 shadow-xl hover:opacity-90 transition-all duration-300'
+              className='w-full py-3 mt-6 font-bold rounded-lg text-black bg-linear-to-r from-orange-600 to-orange-500
+               shadow-xl hover:opacity-90 transition-all duration-300'
             >
               Log in
             </button>

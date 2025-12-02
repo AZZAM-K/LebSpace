@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react'
+import { useState, useContext, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { AppContext } from '../Context/context'
 
@@ -135,7 +135,6 @@ const AllCommentsPage = () => {
                   </div>
                 </div>
 
-                {/* 3 DOTS BUTTON */}
                 {user?.id === c.user?._id && (
                   <div className='relative'>
                     <button
@@ -160,7 +159,6 @@ const AllCommentsPage = () => {
                       </svg>
                     </button>
 
-                    {/* MENU */}
                     {openMenuId === c._id && (
                       <div className='absolute right-0 top-8 bg-gray-900 border border-gray-700 rounded-xl shadow-lg w-32 py-2 z-50'>
                         <button

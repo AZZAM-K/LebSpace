@@ -27,7 +27,6 @@ const Profile = () => {
       setError(result.message || 'Failed to load profile')
     }
     setUser(result.data)
-    console.log('Profile data:', result.data)
     setLoading(false)
   })
 

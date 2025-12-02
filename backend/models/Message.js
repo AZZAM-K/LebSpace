@@ -13,17 +13,17 @@ const MessageSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
-    type: {
-      type: String,
-      enum: ['text', 'image', 'video'],
-      default: 'text',
-    },
-    text: { type: String, default: '' },
-    media: {
-      url: { type: String },
-      public_id: { type: String },
-    },
-    replyTo: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
+    text: { type: String, required: true },
+    read: { type: Boolean, default: false },
+    readBy: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: 'User',
+        },
+        readAt: { type: Date, default: Date.now },
+      },
+    ],
     edited: { type: Boolean, default: false },
   },
   { timestamps: true }

@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useContext, useRef } from 'react'
-import { useParams, useNavigate, Link } from 'react-router-dom' // Use react-router-dom for Link
-import { AppContext } from '../Context/context' // Adjust path as necessary
+import { useEffect, useState, useContext, useRef } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { AppContext } from '../Context/context'
 import {
   MoreVertical,
   Edit,
@@ -12,14 +12,10 @@ import {
   ChevronLeft,
 } from 'lucide-react'
 
-// Assuming your AppContext, getPostById, etc., are correctly implemented.
-// Icon components are now removed and replaced with Lucide React icons.
-
 const PostById = () => {
   const { postId } = useParams()
   const navigate = useNavigate()
 
-  // Destructure context functions and state
   const {
     getPostById,
     editPost,
@@ -46,10 +42,8 @@ const PostById = () => {
   const [editLoading, setEditLoading] = useState(false)
   const [message, setMessage] = useState('')
 
-  // Ref for the menu to handle clicks outside
   const menuRef = useRef(null)
 
-  // Close menu on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (menuRef.current && !menuRef.current.contains(event.target)) {
@@ -82,9 +76,6 @@ const PostById = () => {
           )
         setIsLiked(Boolean(likedByUser))
         setLikesCount(Array.isArray(likes) ? likes.length : 0)
-
-        // **TODO: Implement and fetch isBookmarked state if a context function is available**
-        // For now, keeping it as local state until logic is implemented.
       } else {
         setMessage(result?.message || 'Failed to load post')
       }
@@ -92,26 +83,22 @@ const PostById = () => {
     }
     load()
     return () => (mounted = false)
-  }, [postId, getPostById, user?.id])
+  }, [postId, getPostById, user?.id, user])
 
-  // Double-click to like
   const handleMediaDblClick = async () => {
     if (!isLiked) {
-      // Skip dbl-click if already liked, single click handler will handle unliking
       setIsLiked(true)
       setShowDblClickHeart(true)
       setTimeout(() => setShowDblClickHeart(false), 800)
-      await handleLikeToggle(true) // Force like action
+      await handleLikeToggle(true)
     }
   }
 
-  // Handle Like/Unlike Toggle
   const handleLikeToggle = async (forceLike = false) => {
-    if (!user) return navigate('/login') // Redirect if not logged in
+    if (!user) return navigate('/login')
 
     const actionIsLike = forceLike || !isLiked
 
-    // Optimistic Update
     const prevLiked = isLiked
     const prevCount = likesCount
     setIsLiked(actionIsLike)
@@ -124,12 +111,10 @@ const PostById = () => {
         if (typeof res.data?.likesCount === 'number') {
           setLikesCount(res.data.likesCount)
         } else {
-          // Fallback: refetch count
           const cnt = await getCountOfLikes?.(postId)
           if (cnt?.success) setLikesCount(cnt.data?.likesCount || 0)
         }
       } else {
-        // Revert on failure
         setIsLiked(prevLiked)
         setLikesCount(prevCount)
       }
@@ -201,7 +186,6 @@ const PostById = () => {
         if (updated && updated._id) {
           setPost(prev => ({ ...prev, ...updated }))
         } else {
-          // Fallback update logic
           setPost(prev => ({ ...prev, caption: editCaption }))
           if (editPreview) {
             setPost(prev => ({
@@ -221,7 +205,6 @@ const PostById = () => {
     }
   }
 
-  // --- Render States ---
   if (loading) {
     return (
       <div className='min-h-screen flex justify-center items-center bg-gray-950'>
@@ -246,10 +229,8 @@ const PostById = () => {
     )
   }
 
-  // Determine if the post belongs to the current user
   const isOwner = String(post.user?._id) === String(user?.id)
 
-  // Format creation date
   const dateString = post.createdAt
     ? new Date(post.createdAt).toLocaleString(undefined, {
         year: 'numeric',
@@ -260,13 +241,10 @@ const PostById = () => {
       })
     : ''
 
-  // --- Main Component JSX ---
   return (
     <div className='min-h-screen w-full bg-black text-white flex justify-center'>
       <div className='w-full md:max-w-xl lg:max-w-2xl mx-auto min-h-screen border-x border-gray-800/50'>
-        {/* Header (Top of Post/Screen) */}
         <div className='flex items-center justify-between p-4 border-b border-gray-800 bg-gray-950 sticky top-0 z-30'>
-          {/* Back button for mobile view, Post Author for desktop */}
           <div className='flex items-center'>
             <button
               onClick={() => navigate(-1)}
@@ -298,7 +276,6 @@ const PostById = () => {
             </Link>
           </div>
 
-          {/* Post Menu (Edit/Delete) */}
           {isOwner && (
             <div className='relative' ref={menuRef}>
               <button
@@ -332,11 +309,10 @@ const PostById = () => {
           )}
         </div>
 
-        {/* Post Media Area */}
         <div
           className='relative w-full aspect-square bg-gray-950 flex items-center justify-center'
           onDoubleClick={handleMediaDblClick}
-          style={{ maxHeight: '85vh' }} // Limit height on desktop
+          style={{ maxHeight: '85vh' }}
         >
           {showDblClickHeart && (
             <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20'>
@@ -363,10 +339,8 @@ const PostById = () => {
           )}
         </div>
 
-        {/* Post Actions (Likes, Comments, Save) */}
         <div className='flex items-center justify-between p-3 border-b border-gray-800/50'>
           <div className='flex items-center gap-4'>
-            {/* Like Button & Count */}
             <div className='flex items-center gap-1'>
               <button
                 onClick={() => handleLikeToggle()}
@@ -387,7 +361,6 @@ const PostById = () => {
               </span>
             </div>
 
-            {/* Comment Button & Count */}
             <div className='flex items-center gap-1'>
               <Link
                 to={`/post/${post._id}/add-comment`}
@@ -404,7 +377,6 @@ const PostById = () => {
               </span>
             </div>
 
-            {/* Share/Send Button (Placeholder) */}
             <button
               className='p-1 rounded-full focus:outline-none'
               aria-label='Share Post'
@@ -416,7 +388,6 @@ const PostById = () => {
             </button>
           </div>
 
-          {/* Bookmark Button */}
           <button
             onClick={() => setIsBookmarked(v => !v)}
             className='p-1 rounded-full focus:outline-none transition'
@@ -433,7 +404,6 @@ const PostById = () => {
           </button>
         </div>
 
-        {/* Caption and Comments */}
         <div className='p-4'>
           {post.caption && (
             <div className='mb-3 text-sm leading-snug'>
@@ -470,15 +440,12 @@ const PostById = () => {
             </>
           )}
 
-          {/* Timestamp */}
           <div className='pt-3 text-xs text-gray-500 uppercase tracking-wider'>
             {dateString}
           </div>
         </div>
       </div>
 
-      {/* MODALS */}
-      {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className='fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm'>
           <div className='w-full max-w-sm bg-gray-900 rounded-xl border border-gray-800 p-6 shadow-2xl'>
@@ -498,7 +465,8 @@ const PostById = () => {
               </button>
               <button
                 onClick={confirmDelete}
-                className='flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition disabled:opacity-50'
+                className='flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition
+                 disabled:opacity-50'
                 disabled={editLoading}
               >
                 {editLoading ? 'Deleting...' : 'Delete Permanently'}
@@ -508,7 +476,6 @@ const PostById = () => {
         </div>
       )}
 
-      {/* Edit Post Modal */}
       {showEditModal && (
         <div className='fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm'>
           <div className='w-full max-w-lg bg-gray-900 rounded-xl border border-gray-800 p-6 my-8 shadow-2xl'>
@@ -517,7 +484,6 @@ const PostById = () => {
             </h3>
 
             <form onSubmit={submitEdit} className='space-y-6'>
-              {/* Media Preview/Change */}
               <div>
                 <label className='text-sm text-gray-300 block mb-2 font-semibold'>
                   Media Preview
@@ -529,7 +495,7 @@ const PostById = () => {
                         src={editPreview || post.media.url}
                         controls
                         className='w-full h-full object-contain'
-                        key={editPreview || post.media.url} // Key ensures re-render if src changes
+                        key={editPreview || post.media.url}
                       />
                     ) : (
                       <img
@@ -584,12 +550,11 @@ const PostById = () => {
                   value={editCaption}
                   onChange={e => setEditCaption(e.target.value)}
                   placeholder="What's on your mind?"
-                  className='w-full p-3 bg-gray-800 rounded-lg border border-gray-700 resize-none text-white focus:ring-1 focus:ring-orange-500 focus:border-orange-500 transition'
+                  className='w-full p-3 bg-gray-800 rounded-lg border border-gray-700 resize-none text-white focus:ring-1
+                   focus:ring-orange-500 focus:border-orange-500 transition'
                   rows={4}
                 />
               </div>
-
-              {/* Action Buttons */}
               <div className='flex justify-end gap-3 pt-4'>
                 <button
                   type='button'
@@ -601,7 +566,8 @@ const PostById = () => {
                 </button>
                 <button
                   type='submit'
-                  className='px-6 py-3 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-600 transition disabled:opacity-50'
+                  className='px-6 py-3 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-600 transition
+                   disabled:opacity-50'
                   disabled={editLoading}
                 >
                   {editLoading ? 'Saving...' : 'Save Changes'}

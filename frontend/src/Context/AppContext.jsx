@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { io } from 'socket.io-client'
 import { AppContext } from './context'
 
 const AppContextProvider = props => {
   const backendUrl = import.meta.env.VITE_BACKEND_URL
 
   const [token, setToken] = useState(localStorage.getItem('token') || '')
+  const [socket, setSocket] = useState(null)
   const [user, setUser] = useState(() => {
     try {
       const storedUser = localStorage.getItem('user')
@@ -186,7 +188,6 @@ const AppContextProvider = props => {
       }
 
       const userData = data.data || data
-      localStorage.setItem('user', JSON.stringify(userData))
 
       return { success: true, data: userData }
     } catch (error) {
@@ -204,14 +205,37 @@ const AppContextProvider = props => {
       const data = await res.json()
       if (!res.ok) return { success: false, message: data.message }
 
-      localStorage.setItem('user', JSON.stringify(data))
-      setUser(data)
+      localStorage.setItem('user', JSON.stringify(data.user))
+      setUser(data.user)
 
       return { success: true }
     } catch (error) {
       return { success: false, message: error.message }
     }
   }
+
+  useEffect(() => {
+    if (!token) return
+
+    const s = io(backendUrl, {
+      auth: { token },
+      transports: ['websocket'],
+    })
+
+    s.on('connect_error', err => console.error('Socket connection error:', err))
+
+    const handleConnect = () => {
+      console.log('Connected socket:', s.id)
+      setSocket(s)
+    }
+    s.on('connect', handleConnect)
+
+    return () => {
+      s.off('connect', handleConnect)
+      s.disconnect()
+      setSocket(null)
+    }
+  }, [token, backendUrl])
 
   const addLikeAndRemoveLike = async postId => {
     try {
@@ -450,9 +474,7 @@ const AppContextProvider = props => {
   const getNotifications = async () => {
     try {
       const res = await fetch(`${backendUrl}/api/notifications`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
 
@@ -473,9 +495,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/notifications/${id}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
 
@@ -496,9 +516,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/notifications`, {
         method: 'DELETE',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
 
@@ -519,9 +537,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}/follow`, {
         method: 'DELETE',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
       if (!res.ok) {
@@ -540,9 +556,7 @@ const AppContextProvider = props => {
   const getSettingsData = async () => {
     try {
       const res = await fetch(`${backendUrl}/api/users/settings`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
 
       const data = await res.json()
@@ -565,9 +579,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/users/privacy`, {
         method: 'PUT',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
 
       const data = await res.json()
@@ -613,9 +625,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}/block`, {
         method: 'POST',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
       if (!res.ok) {
@@ -635,10 +645,9 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}/unblock`, {
         method: 'POST',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
+
       const data = await res.json()
       if (!res.ok) {
         console.log('Error unblocking user:', res.statusText)
@@ -648,6 +657,204 @@ const AppContextProvider = props => {
         }
       }
       return { success: true }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const deleteAccount = async formData => {
+    try {
+      const res = await fetch(`${backendUrl}/api/users/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        body: JSON.stringify(formData),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error deleting account:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error deleting account',
+        }
+      }
+
+      localStorage.removeItem('token')
+      localStorage.removeItem('user')
+      setToken('')
+      setUser(null)
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const getChatById = async id => {
+    try {
+      const res = await fetch(`${backendUrl}/api/chats/${id}`, {
+        headers: { Authorization: token },
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error getting chat:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error getting chat',
+        }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const createChat = async id => {
+    try {
+      const res = await fetch(`${backendUrl}/api/chats/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        body: JSON.stringify(id),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error creating chat:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error creating chat',
+        }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const sendMessage = async (id, text) => {
+    try {
+      const res = await fetch(`${backendUrl}/api/messages/${id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        body: JSON.stringify(text),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error sending message:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error sending message',
+        }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const editMessage = async (id, text) => {
+    try {
+      const res = await fetch(`${backendUrl}/api/messages/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: token,
+        },
+        body: JSON.stringify(text),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error editing message:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error editing message',
+        }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const deleteMessage = async id => {
+    try {
+      const res = await fetch(`${backendUrl}/api/messages/${id}`, {
+        method: 'DELETE',
+        headers: { Authorization: token },
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error deleting message:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error deleting message',
+        }
+      }
+
+      return { success: true }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const markMessagesAsRead = async chatId => {
+    try {
+      const res = await fetch(
+        `${backendUrl}/api/messages/${chatId}/mark-read`,
+        {
+          method: 'POST',
+          headers: { Authorization: token },
+        }
+      )
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error marking messages as read:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error marking messages as read',
+        }
+      }
+
+      return { success: true, data }
+    } catch (error) {
+      return { success: false, message: error.message }
+    }
+  }
+
+  const getChats = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/api/chats`, {
+        headers: { Authorization: token },
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        console.log('Error fetching the chats:', res.statusText)
+        return {
+          success: false,
+          message: data.message || 'Error fetching the chats',
+        }
+      }
+
+      return { success: true, data }
     } catch (error) {
       return { success: false, message: error.message }
     }
@@ -692,6 +899,15 @@ const AppContextProvider = props => {
     changePassword,
     blockUser,
     unblockUser,
+    deleteAccount,
+    getChatById,
+    socket,
+    createChat,
+    sendMessage,
+    editMessage,
+    deleteMessage,
+    markMessagesAsRead,
+    getChats,
   }
 
   return (

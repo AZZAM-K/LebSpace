@@ -1,9 +1,8 @@
-// AddPostMobile.jsx (FIXED file input ref issue)
-import React, { useEffect, useState, useRef, useContext } from "react"
-import { AppContext } from "../Context/context"
-import { useNavigate } from "react-router"
+import { useEffect, useState, useRef, useContext } from 'react'
+import { AppContext } from '../Context/context'
+import { useNavigate } from 'react-router'
 
-const IconBack = ({ className = "w-6 h-6" }) => (
+const IconBack = ({ className = 'w-6 h-6' }) => (
   <svg
     className={className}
     viewBox='0 0 24 24'
@@ -18,7 +17,7 @@ const IconBack = ({ className = "w-6 h-6" }) => (
     />
   </svg>
 )
-const IconNext = ({ className = "w-6 h-6" }) => (
+const IconNext = ({ className = 'w-6 h-6' }) => (
   <svg
     className={className}
     viewBox='0 0 24 24'
@@ -33,7 +32,7 @@ const IconNext = ({ className = "w-6 h-6" }) => (
     />
   </svg>
 )
-const IconTrash = ({ className = "w-5 h-5" }) => (
+const IconTrash = ({ className = 'w-5 h-5' }) => (
   <svg
     className={className}
     viewBox='0 0 24 24'
@@ -48,7 +47,7 @@ const IconTrash = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 )
-const IconChange = ({ className = "w-5 h-5" }) => (
+const IconChange = ({ className = 'w-5 h-5' }) => (
   <svg
     className={className}
     viewBox='0 0 24 24'
@@ -69,20 +68,20 @@ const AddPostMobile = ({ onClose }) => {
 
   const fileRef = useRef(null)
   const [step, setStep] = useState(1)
-  const [contentType, setContentType] = useState("image")
+  const [contentType, setContentType] = useState('image')
   const [mediaFile, setMediaFile] = useState(null)
   const [preview, setPreview] = useState(null)
-  const [caption, setCaption] = useState("")
+  const [caption, setCaption] = useState('')
   const [hashtags, setHashtags] = useState([])
-  const [tagInput, setTagInput] = useState("")
-  const [hashtagInput, setHashtagInput] = useState("")
+  const [tagInput, setTagInput] = useState('')
+  const [hashtagInput, setHashtagInput] = useState('')
   const [taggedUsers, setTaggedUsers] = useState([])
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState("")
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     const prev = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    document.body.style.overflow = 'hidden'
     return () => {
       document.body.style.overflow = prev
     }
@@ -100,7 +99,7 @@ const AddPostMobile = ({ onClose }) => {
 
   const handleFile = file => {
     if (!file) return
-    const type = file.type.startsWith("video") ? "video" : "image"
+    const type = file.type.startsWith('video') ? 'video' : 'image'
     setContentType(type)
     setMediaFile(file)
     setStep(1)
@@ -109,7 +108,7 @@ const AddPostMobile = ({ onClose }) => {
   const onFileChange = e => {
     const f = e.target.files?.[0]
     handleFile(f)
-    e.target.value = ""
+    e.target.value = ''
   }
 
   const openFileDialog = () => {
@@ -124,11 +123,11 @@ const AddPostMobile = ({ onClose }) => {
   const addHashtag = () => {
     const val = hashtagInput.trim()
     if (!val) return
-    const cleaned = val.replace(/^#/, "")
+    const cleaned = val.replace(/^#/, '')
     if (!hashtags.includes(cleaned)) {
       setHashtags(prev => [...prev, cleaned])
-      setHashtagInput("")
-    } else setHashtagInput("")
+      setHashtagInput('')
+    } else setHashtagInput('')
   }
 
   const removeHashtag = t => setHashtags(prev => prev.filter(x => x !== t))
@@ -136,11 +135,11 @@ const AddPostMobile = ({ onClose }) => {
   const addTaggedUser = () => {
     const val = tagInput.trim()
     if (!val) return
-    const cleaned = val.replace(/^@/, "")
+    const cleaned = val.replace(/^@/, '')
     if (!taggedUsers.includes(cleaned)) {
       setTaggedUsers(prev => [...prev, cleaned])
-      setTagInput("")
-    } else setTagInput("")
+      setTagInput('')
+    } else setTagInput('')
   }
 
   const removeTaggedUser = u =>
@@ -148,11 +147,11 @@ const AddPostMobile = ({ onClose }) => {
 
   const nextStep = () => {
     if (step === 1) {
-      if (!mediaFile && contentType !== "text") {
-        setMessage("Please select an image or video first.")
+      if (!mediaFile && contentType !== 'text') {
+        setMessage('Please select an image or video first.')
         return
       }
-      setMessage("")
+      setMessage('')
       setStep(2)
     } else {
       setStep(2)
@@ -163,45 +162,45 @@ const AddPostMobile = ({ onClose }) => {
 
   const prevStep = () => {
     if (step === 2) {
-      setStep(1) 
+      setStep(1)
     } else if (step === 1) {
-      navigate("/") 
+      navigate('/')
     } else {
       onClose && onClose()
     }
   }
 
   const handleSubmit = async () => {
-    if (!mediaFile && contentType !== "text") {
-      setMessage("Please add media or switch to text type.")
+    if (!mediaFile && contentType !== 'text') {
+      setMessage('Please add media or switch to text type.')
       return
     }
     setLoading(true)
-    setMessage("")
+    setMessage('')
     try {
       const form = new FormData()
-      form.append("contentType", contentType)
-      if (mediaFile) form.append("media", mediaFile)
-      form.append("caption", caption)
-      form.append("hashtags", JSON.stringify(hashtags))
-      form.append("taggedUsers", JSON.stringify(taggedUsers))
+      form.append('contentType', contentType)
+      if (mediaFile) form.append('media', mediaFile)
+      form.append('caption', caption)
+      form.append('hashtags', JSON.stringify(hashtags))
+      form.append('taggedUsers', JSON.stringify(taggedUsers))
       const result = await addPost(form)
       setLoading(false)
       if (result?.success) {
-        setMessage("Posted successfully!")
+        setMessage('Posted successfully!')
         setMediaFile(null)
         setPreview(null)
-        setCaption("")
+        setCaption('')
         setHashtags([])
         setTaggedUsers([])
         setStep(1)
         setTimeout(() => onClose && onClose(), 700)
       } else {
-        setMessage(result?.message || "Failed to post.")
+        setMessage(result?.message || 'Failed to post.')
       }
     } catch (err) {
       setLoading(false)
-      setMessage("Error uploading post.")
+      setMessage('Error uploading post.')
     }
   }
 
@@ -226,7 +225,7 @@ const AddPostMobile = ({ onClose }) => {
 
         <div className='flex items-center gap-2'>
           <div className='text-sm text-gray-300/80'>
-            {step === 1 ? "Preview" : "Create"}
+            {step === 1 ? 'Preview' : 'Create'}
           </div>
         </div>
 
@@ -235,7 +234,7 @@ const AddPostMobile = ({ onClose }) => {
           className='text-sm text-orange-400 font-semibold px-3 py-1 rounded-md hover:bg-white/5 transition disabled:opacity-40'
           disabled={step === 2 && loading}
         >
-          {step === 1 ? "Next" : "Next"}
+          {step === 1 ? 'Next' : 'Next'}
         </button>
       </div>
 
@@ -264,7 +263,7 @@ const AddPostMobile = ({ onClose }) => {
 
                     <button
                       onClick={() => {
-                        setContentType("text")
+                        setContentType('text')
                         setStep(2)
                       }}
                       className='bg-white/5 text-white px-4 py-2 rounded-lg'
@@ -275,7 +274,7 @@ const AddPostMobile = ({ onClose }) => {
                 </div>
               ) : (
                 <>
-                  {contentType === "image" ? (
+                  {contentType === 'image' ? (
                     <img
                       src={preview}
                       alt='preview'
@@ -319,24 +318,24 @@ const AddPostMobile = ({ onClose }) => {
               <div className='max-w-md mx-auto mt-3 px-2'>
                 <button
                   onClick={() => {
-                    const top = document.createElement("div")
+                    const top = document.createElement('div')
                     top.className =
-                      "fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center"
+                      'fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center'
                     top.onclick = () => document.body.removeChild(top)
                     const el = document.createElement(
-                      contentType === "image" ? "img" : "video"
+                      contentType === 'image' ? 'img' : 'video'
                     )
-                    if (contentType === "image") {
+                    if (contentType === 'image') {
                       el.src = preview
-                      el.style.maxWidth = "95%"
-                      el.style.maxHeight = "95%"
-                      el.style.borderRadius = "10px"
+                      el.style.maxWidth = '95%'
+                      el.style.maxHeight = '95%'
+                      el.style.borderRadius = '10px'
                     } else {
                       el.src = preview
                       el.controls = true
-                      el.style.maxWidth = "95%"
-                      el.style.maxHeight = "95%"
-                      el.style.borderRadius = "10px"
+                      el.style.maxWidth = '95%'
+                      el.style.maxHeight = '95%'
+                      el.style.borderRadius = '10px'
                     }
                     top.appendChild(el)
                     document.body.appendChild(top)
@@ -355,7 +354,7 @@ const AddPostMobile = ({ onClose }) => {
             <div className='flex items-center gap-3'>
               <div className='w-20 h-20 bg-black rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center'>
                 {preview ? (
-                  contentType === "image" ? (
+                  contentType === 'image' ? (
                     <img
                       src={preview}
                       alt='mini'
@@ -389,7 +388,7 @@ const AddPostMobile = ({ onClose }) => {
                   value={hashtagInput}
                   onChange={e => setHashtagInput(e.target.value)}
                   onKeyDown={e =>
-                    e.key === "Enter" && (e.preventDefault(), addHashtag())
+                    e.key === 'Enter' && (e.preventDefault(), addHashtag())
                   }
                   placeholder='Add hashtag (press Enter)'
                   className='flex-1 bg-gray-800 text-white placeholder-gray-400 px-3 py-2 rounded-lg border border-gray-700 focus:outline-none'
@@ -421,7 +420,7 @@ const AddPostMobile = ({ onClose }) => {
                   value={tagInput}
                   onChange={e => setTagInput(e.target.value)}
                   onKeyDown={e =>
-                    e.key === "Enter" && (e.preventDefault(), addTaggedUser())
+                    e.key === 'Enter' && (e.preventDefault(), addTaggedUser())
                   }
                   placeholder='Tag user (press Enter)'
                   className='flex-1 bg-gray-800 text-white placeholder-gray-400 px-3 py-2 rounded-lg border border-gray-700 focus:outline-none'
@@ -453,7 +452,7 @@ const AddPostMobile = ({ onClose }) => {
                 disabled={loading}
                 className='w-full bg-orange-500 text-black font-bold py-3 rounded-lg'
               >
-                {loading ? "Posting..." : "Share"}
+                {loading ? 'Posting...' : 'Share'}
               </button>
             </div>
 

@@ -1,5 +1,10 @@
 import User from '../models/User.js'
 import Notification from '../models/Notification.js'
+import Story from '../models/Story.js'
+import Post from '../models/Post.js'
+import Comment from '../models/Comment.js'
+import Chat from '../models/Chat.js'
+import Message from '../models/Message.js'
 import { generateToken } from '../utils/jwt.js'
 import bcrypt from 'bcrypt'
 import { cloudinary } from '../config/uploader.js'
@@ -140,12 +145,14 @@ export const updateProfile = async (req, res) => {
     user.bio = bio || user.bio
     await user.save()
     res.status(200).json({
-      id: user._id,
-      username: user.username,
-      fullName: user.fullName,
-      bio: user.bio,
-      email: user.email,
-      img: user.profilePicture.url,
+      user: {
+        id: user._id,
+        username: user.username,
+        fullName: user.fullName,
+        bio: user.bio,
+        email: user.email,
+        img: user.profilePicture.url,
+      },
     })
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -425,6 +432,96 @@ export const changePassword = async (req, res) => {
     await user.save()
 
     res.status(200).json({ message: 'Password changed successfully' })
+  } catch (error) {
+    res.status(500).json({ message: error.message })
+  }
+}
+
+export const deleteAccount = async (req, res) => {
+  try {
+    const { password } = req.body
+    const id = req.userId
+    const user = await User.findById(id)
+      .populate('posts', 'media')
+      .populate('stories', 'media')
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' })
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect' })
+    }
+
+    const commentIds = await Comment.find({ user: id }).select('_id')
+    for (const comment of commentIds) {
+      await Post.updateMany(
+        { comments: comment._id },
+        { $pull: { comments: comment._id } }
+      )
+    }
+    await Comment.deleteMany({ user: id })
+
+    for (const post of user.posts) {
+      await User.updateMany(
+        { likedPosts: post._id },
+        { $pull: { likedPosts: post._id } }
+      )
+
+      if (post.media?.public_id) {
+        try {
+          await cloudinary.uploader.destroy(post.media.public_id)
+        } catch (err) {
+          console.log('Error deleting post media:', err)
+        }
+      }
+
+      await User.updateMany(
+        { savedPosts: post._id },
+        { $pull: { savedPosts: post._id } }
+      )
+    }
+    await Post.deleteMany({ user: id })
+
+    for (const story of user.stories) {
+      if (story.media?.public_id) {
+        try {
+          await cloudinary.uploader.destroy(story.media.public_id)
+        } catch (err) {
+          console.log('Error deleting story media:', err)
+        }
+      }
+    }
+    await Story.deleteMany({ user: id })
+
+    await User.updateMany({ following: id }, { $pull: { following: id } })
+
+    await User.updateMany({ followers: id }, { $pull: { followers: id } })
+
+    await User.updateMany({ blockedUsers: id }, { $pull: { blockedUsers: id } })
+
+    await Notification.deleteMany({ user: id })
+    await Notification.deleteMany({ sender: id })
+
+    const chats = await Chat.find({ participants: id })
+
+    for (const chat of chats) {
+      await Message.deleteMany({ chat: chat._id })
+      await Chat.deleteMany({ _id: chat._id })
+    }
+
+    if (user.profilePicture?.public_id) {
+      try {
+        await cloudinary.uploader.destroy(user.profilePicture.public_id)
+      } catch (err) {
+        console.log('Error deleting profile picture:', err)
+      }
+    }
+
+    await User.findByIdAndDelete(id)
+
+    res.status(200).json({ message: 'Account deleted successfully' })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }

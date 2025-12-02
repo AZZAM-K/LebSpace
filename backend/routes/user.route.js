@@ -16,6 +16,7 @@ import {
   changePassword,
   togglePrivacy,
   getSettingsData,
+  deleteAccount,
 } from '../controllers/user.controller.js'
 import { authenticate } from '../middleware/auth.js'
 import { upload } from '../config/uploader.js'
@@ -33,6 +34,7 @@ router
 router.get('/settings', authenticate, getSettingsData)
 router.put('/change-password', authenticate, changePassword)
 router.put('/privacy', authenticate, togglePrivacy)
+router.delete('/delete', authenticate, deleteAccount)
 
 router.get('/:id/followers', authenticate, getFollowers)
 router.get('/:id', authenticate, getUserById)

@@ -13,6 +13,8 @@ import User from './Pages/User.jsx'
 import Followers from './Pages/Followers'
 import Notifications from './Pages/Notifications.jsx'
 import Settings from './Pages/Settings.jsx'
+import Chat from './Pages/Chat.jsx'
+import Messages from './Pages/Messages.jsx'
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
         <Route path='/users/:id/followers' element={<Followers />} />
         <Route path='/notifications' element={<Notifications />} />
         <Route path='/settings' element={<Settings />} />
+        <Route path='/chat/:id' element={<Chat />} />
+        <Route path='/messages' element={<Messages />} />
       </Route>
       <Route path='/login' element={<Login />} />
       <Route path='/signup' element={<SignUp />} />

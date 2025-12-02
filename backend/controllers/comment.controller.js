@@ -1,5 +1,6 @@
 import Post from '../models/Post.js'
 import Comment from '../models/Comment.js'
+import Notification from '../models/Notification.js'
 
 export const addComment = async (req, res) => {
   try {
@@ -21,10 +22,18 @@ export const addComment = async (req, res) => {
     const newComment = new Comment({
       user: userId,
       post: postId,
-      text: content.trim(), // صح
+      text: content.trim(),
     })
 
     await newComment.save()
+
+    const newNotification = new Notification({
+      user: post.user,
+      sender: userId,
+      post: postId,
+      type: 'comment',
+    })
+    await newNotification.save()
 
     post.comments.push(newComment._id)
     await post.save()
@@ -72,14 +81,13 @@ export const getCountOfComments = async (req, res) => {
 export const deleteComment = async (req, res) => {
   try {
     const { commentId } = req.params
-    const userId = req.userId // من الـ authenticate
+    const userId = req.userId
 
     const comment = await Comment.findById(commentId)
     if (!comment) {
       return res.status(404).json({ message: 'Comment not found' })
     }
 
-    // ❗ مهم جداً: السماح لصاحب البوست أو صاحب الكومنت فقط
     const post = await Post.findById(comment.post)
 
     if (
@@ -89,10 +97,8 @@ export const deleteComment = async (req, res) => {
       return res.status(403).json({ message: 'Forbidden' })
     }
 
-    // احذف الكومنت
     await Comment.findByIdAndDelete(commentId)
 
-    // شيل الكومنت من المصفوفة في بوست
     await Post.findByIdAndUpdate(comment.post, {
       $pull: { comments: commentId },
     })
