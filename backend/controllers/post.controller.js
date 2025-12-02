@@ -1,6 +1,6 @@
-import Post from '../models/Post.js'
-import User from '../models/User.js'
-import { cloudinary } from '../config/uploader.js'
+import Post from "../models/Post.js"
+import User from "../models/User.js"
+import { cloudinary } from "../config/uploader.js"
 
 const uploadToCloudinary = (fileBuffer, type) => {
   return new Promise((resolve, reject) => {
@@ -19,10 +19,10 @@ export const addPost = async (req, res) => {
   try {
     const { contentType, caption, hashtags, taggedUsers } = req.body
     const userId = req.userId
-    let mediaData = { url: '', public_id: '' }
+    let mediaData = { url: "", public_id: "" }
 
     if (req.file) {
-      const type = contentType === 'video' ? 'video' : 'image'
+      const type = contentType === "video" ? "video" : "image"
       const result = await uploadToCloudinary(req.file.buffer, type)
       mediaData = { url: result.secure_url, public_id: result.public_id }
     }
@@ -31,7 +31,7 @@ export const addPost = async (req, res) => {
       user: userId,
       contentType,
       media: mediaData,
-      caption: caption || '',
+      caption: caption || "",
       hashtags: hashtags ? JSON.parse(hashtags) : [],
       taggedUsers: taggedUsers ? JSON.parse(taggedUsers) : [],
     })
@@ -42,8 +42,8 @@ export const addPost = async (req, res) => {
 
     res.status(201).json(savedPost)
   } catch (error) {
-    console.error('Error adding post:', error)
-    res.status(500).json({ message: error.message || 'Server error' })
+    console.error("Error adding post:", error)
+    res.status(500).json({ message: error.message || "Server error" })
   }
 }
 
@@ -54,10 +54,10 @@ export const editPost = async (req, res) => {
     const userId = req.userId
 
     const post = await Post.findById(postId)
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) return res.status(404).json({ message: "Post not found" })
 
     if (post.user.toString() !== userId.toString())
-      return res.status(403).json({ message: 'Not authorized' })
+      return res.status(403).json({ message: "Not authorized" })
 
     if (caption !== undefined) post.caption = caption
     if (hashtags) post.hashtags = JSON.parse(hashtags)
@@ -65,7 +65,7 @@ export const editPost = async (req, res) => {
     if (contentType) post.contentType = contentType
 
     if (req.file) {
-      const type = contentType === 'video' ? 'video' : 'image'
+      const type = contentType === "video" ? "video" : "image"
 
       if (post.media.public_id) {
         await cloudinary.uploader.destroy(post.media.public_id, {
@@ -80,8 +80,8 @@ export const editPost = async (req, res) => {
     const updatedPost = await post.save()
     res.status(200).json(updatedPost)
   } catch (error) {
-    console.error('Error editing post:', error)
-    res.status(500).json({ message: 'Server error' })
+    console.error("Error editing post:", error)
+    res.status(500).json({ message: "Server error" })
   }
 }
 
@@ -91,13 +91,13 @@ export const deletePost = async (req, res) => {
     const userId = req.userId
 
     const post = await Post.findById(postId)
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) return res.status(404).json({ message: "Post not found" })
 
     if (String(post.user) !== String(userId))
-      return res.status(403).json({ message: 'Not authorized' })
+      return res.status(403).json({ message: "Not authorized" })
 
     if (post.media.public_id) {
-      const type = post.contentType === 'video' ? 'video' : 'image'
+      const type = post.contentType === "video" ? "video" : "image"
       await cloudinary.uploader.destroy(post.media.public_id, {
         resource_type: type,
       })
@@ -107,10 +107,10 @@ export const deletePost = async (req, res) => {
 
     await User.findByIdAndUpdate(userId, { $pull: { posts: postId } })
 
-    res.status(200).json({ message: 'Post deleted successfully' })
+    res.status(200).json({ message: "Post deleted successfully" })
   } catch (error) {
-    console.error('Error deleting post:', error)
-    res.status(500).json({ message: 'Server error' })
+    console.error("Error deleting post:", error)
+    res.status(500).json({ message: "Server error" })
   }
 }
 export const getPostById = async (req, res) => {
@@ -118,46 +118,54 @@ export const getPostById = async (req, res) => {
     const { postId } = req.params
 
     const post = await Post.findById(postId)
-      .populate('user', 'username fullname profilePicture')
+      .populate("user", "username fullname profilePicture")
       .populate({
-        path: 'comments',
+        path: "comments",
         populate: {
-          path: 'user',
-          select: 'username fullname profilePicture',
+          path: "user",
+          select: "username fullname profilePicture",
         },
       })
-      .populate('taggedUsers', 'username fullname profilePicture')
+      .populate("taggedUsers", "username fullname profilePicture")
 
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) return res.status(404).json({ message: "Post not found" })
 
     res.status(200).json(post)
   } catch (error) {
-    console.error(' Error fetching post:', error)
-    res.status(500).json({ message: 'Server error', error: error.message })
+    console.error(" Error fetching post:", error)
+    res.status(500).json({ message: "Server error", error: error.message })
   }
 }
+
 
 export const addLikeAndRemoveLike = async (req, res) => {
   try {
     const { postId } = req.params
-    const userId = req.userId
+    const userId = req.userId.toString()
+
     const post = await Post.findById(postId)
-    if (!post) return res.status(404).json({ message: 'Post not found' })
-    const hasLiked = post.likes.includes(userId)
+    if (!post) return res.status(404).json({ message: "Post not found" })
+
+    const likes = post.likes.map(id => id.toString())
+
+    const hasLiked = likes.includes(userId)
 
     if (hasLiked) {
-      post.likes.pull(userId)
+      post.likes = post.likes.filter(id => id.toString() !== userId)
     } else {
       post.likes.push(userId)
     }
+
     await post.save()
 
-    return res
-      .status(200)
-      .json({ success: true, liked: !hasLiked, likesCount: post.likes.length })
+    return res.status(200).json({
+      success: true,
+      liked: !hasLiked,
+      likesCount: post.likes.length,
+    })
   } catch (error) {
-    console.error('Error toggling like:', error)
-    return res.status(500).json({ message: 'Server error' })
+    console.error("Error toggling like:", error)
+    return res.status(500).json({ message: "Server error" })
   }
 }
 
@@ -165,11 +173,54 @@ export const getCountOfLikes = async (req, res) => {
   try {
     const { postId } = req.params
     const post = await Post.findById(postId)
-    if (!post) return res.status(404).json({ message: 'Post not found' })
+    if (!post) return res.status(404).json({ message: "Post not found" })
     const likesCount = post.likes.length
     return res.status(200).json({ success: true, likesCount })
   } catch (error) {
-    console.error('Error fetching likes count:', error)
-    return res.status(500).json({ message: 'Server error' })
+    console.error("Error fetching likes count:", error)
+    return res.status(500).json({ message: "Server error" })
   }
 }
+
+export const getAllPostsPriorityForFollowing = async (req, res) => {
+  try {
+    const userId = req.userId
+    const user = await User.findById(userId).populate("following")
+    if (!user) return res.status(404).json({ message: "User not found" })
+    const followingIds = user.following.map(f => f._id)
+
+    const stories = await Post.find({ user: { $in: followingIds } })
+      .sort({ createdAt: -1 })
+      .populate("user", "username fullname profilePicture")
+      .populate("taggedUsers", "username fullname profilePicture")
+    return res.status(200).json({
+      success: true,
+      posts: stories,
+    })
+  } catch (error) {
+    console.error("Error fetching following posts:", error)
+    return res
+      .status(500)
+      .json({ message: "Server error fetching following posts" })
+  }
+}
+
+export const getTaggedPosts = async (req, res) => {
+  try {
+    const userId = req.userId
+    const taggedPosts = await Post.find({ taggedUsers: userId })
+      .sort({ createdAt: -1 })
+      .populate("user", "username fullname profilePicture")
+    return res.status(200).json({
+      success: true,
+      posts: taggedPosts,
+    })
+  } catch (error) {
+    console.error("Error fetching tagged posts:", error)
+    return res
+      .status(500)
+      .json({ message: "Server error fetching tagged posts" })
+  }
+}
+
+

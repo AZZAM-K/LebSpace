@@ -11,27 +11,33 @@ import {
   Eye,
   ChevronUp,
   ChevronDown,
-} from 'lucide-react'
-import { useContext, useEffect, useState, useEffectEvent } from 'react'
-import { AppContext } from '../Context/context'
+  LogOut,
+} from "lucide-react"
+import { useContext, useEffect, useState, useEffectEvent } from "react"
+import { AppContext } from "../Context/context"
 
 const Settings = () => {
-  const { getSettingsData, togglePrivacy, changePassword, unblockUser } =
-    useContext(AppContext)
+  const {
+    getSettingsData,
+    logout,
+    togglePrivacy,
+    changePassword,
+    unblockUser,
+  } = useContext(AppContext)
 
   const [isPrivate, setIsPrivate] = useState(false)
   const [passData, setPassData] = useState({
-    currentPassword: '',
-    newPassword: '',
+    currentPassword: "",
+    newPassword: "",
   })
   const [blockedUsers, setBlockedUsers] = useState([])
   const [isBlockedListOpen, setIsBlockedListOpen] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [deletePassword, setDeletePassword] = useState('')
+  const [deletePassword, setDeletePassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
-  const [passMessage, setPassMessage] = useState({ type: '', text: '' })
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [error, setError] = useState('')
+  const [passMessage, setPassMessage] = useState({ type: "", text: "" })
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
   const [changing, setChanging] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -40,13 +46,18 @@ const Settings = () => {
   const fetchSettingsEvent = useEffectEvent(async () => {
     const result = await getSettingsData()
     if (!result.success) {
-      setError(result.message || 'Failed to load settings')
+      setError(result.message || "Failed to load settings")
     }
     setIsPrivate(result.data.isPrivate)
     setBlockedUsers(result.data.blockedUsers)
-    console.log('data:', result.data)
+    console.log("data:", result.data)
     setLoading(false)
   })
+
+  const handleLogout = () => {
+    logout()
+    navigate("/login")
+  }
 
   useEffect(() => {
     fetchSettingsEvent()
@@ -72,18 +83,18 @@ const Settings = () => {
     e.preventDefault()
     try {
       if (passData.newPassword !== confirmPassword) {
-        setPassMessage({ type: 'error', text: 'Passwords do not match' })
+        setPassMessage({ type: "error", text: "Passwords do not match" })
         return
       }
       setChanging(true)
       const res = await changePassword(passData)
       if (res.success) {
-        setPassMessage({ type: '', text: res.message })
+        setPassMessage({ type: "", text: res.message })
       } else {
-        setPassMessage({ type: 'error', text: res.message })
+        setPassMessage({ type: "error", text: res.message })
       }
     } catch (error) {
-      setPassMessage({ type: 'error', text: error.message })
+      setPassMessage({ type: "error", text: error.message })
     } finally {
       setChanging(false)
     }
@@ -148,10 +159,10 @@ const Settings = () => {
                 </span>
                 <span className='text-xs text-gray-500 mt-1'>
                   {toggling
-                    ? 'changing privacy settings'
+                    ? "changing privacy settings"
                     : isPrivate
-                    ? 'Only followers can see your photos and videos.'
-                    : 'Anyone on or off LebSpace can see your content.'}
+                    ? "Only followers can see your photos and videos."
+                    : "Anyone on or off LebSpace can see your content."}
                 </span>
               </div>
 
@@ -160,12 +171,12 @@ const Settings = () => {
                 onClick={handleToggling}
                 className={`w-14 h-7 rounded-full transition-all duration-300 relative focus:outline-none focus:ring-2
                  focus:ring-[#F65C21]/50 ${
-                   isPrivate ? 'bg-[#F65C21]' : 'bg-gray-700'
+                   isPrivate ? "bg-[#F65C21]" : "bg-gray-700"
                  }`}
               >
                 <span
                   className={`absolute top-1 w-5 h-5 bg-white rounded-full shadow-md transition-transform duration-300 ${
-                    isPrivate ? 'translate-x-1' : '-translate-x-6'
+                    isPrivate ? "translate-x-1" : "-translate-x-6"
                   }`}
                 />
               </button>
@@ -192,12 +203,12 @@ const Settings = () => {
               {passMessage.text && (
                 <div
                   className={`p-3 rounded-lg text-sm flex items-center gap-2 ${
-                    passMessage.type === 'error'
-                      ? 'bg-red-500/10 text-red-400'
-                      : 'bg-green-500/10 text-green-400'
+                    passMessage.type === "error"
+                      ? "bg-red-500/10 text-red-400"
+                      : "bg-green-500/10 text-green-400"
                   }`}
                 >
-                  {passMessage.type === 'error' ? (
+                  {passMessage.type === "error" ? (
                     <AlertTriangle size={16} />
                   ) : (
                     <CheckCircle2 size={16} />
@@ -233,7 +244,7 @@ const Settings = () => {
                   </label>
                   <div className='relative'>
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       value={passData.newPassword}
                       onChange={e =>
                         setPassData({
@@ -260,7 +271,7 @@ const Settings = () => {
                     Confirm New
                   </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     value={confirmPassword}
                     onChange={e => setConfirmPassword(e.target.value)}
                     className='w-full bg-black border border-gray-700 rounded-lg p-2.5 text-white focus:border-[#F65C21]
@@ -280,7 +291,7 @@ const Settings = () => {
                   {changing ? (
                     <Loader2 className='animate-spin' />
                   ) : (
-                    'Update Password'
+                    "Update Password"
                   )}
                 </button>
               </div>
@@ -375,7 +386,15 @@ const Settings = () => {
                 Delete Account
               </button>
             </div>
-          </div>
+          </div><div className='border-t border-gray-800 pt-4'>
+              <button
+                onClick={handleLogout}
+                className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
+              >
+                <LogOut size={22} />
+                <span>Log Out</span>
+              </button>
+            </div>
         </div>
       </div>
 
@@ -436,6 +455,7 @@ const Settings = () => {
                 </button>
               </div>
             </div>
+            
           </div>
         </div>
       )}

@@ -1,8 +1,8 @@
-import User from '../models/User.js'
-import Notification from '../models/Notification.js'
-import { generateToken } from '../utils/jwt.js'
-import bcrypt from 'bcrypt'
-import { cloudinary } from '../config/uploader.js'
+import User from "../models/User.js"
+import Notification from "../models/Notification.js"
+import { generateToken } from "../utils/jwt.js"
+import bcrypt from "bcrypt"
+import { cloudinary } from "../config/uploader.js"
 
 export const signUp = async (req, res) => {
   try {
@@ -11,7 +11,7 @@ export const signUp = async (req, res) => {
     if (existingUser) {
       return res
         .status(400)
-        .json({ message: 'Username or email already exists' })
+        .json({ message: "Username or email already exists" })
     }
     const hashedPassword = await bcrypt.hash(password, 10)
     const newUser = new User({
@@ -45,11 +45,11 @@ export const login = async (req, res) => {
     const { email, password } = req.body
     const user = await User.findOne({ email })
     if (!user) {
-      return res.status(400).json({ message: 'Email not found' })
+      return res.status(400).json({ message: "Email not found" })
     }
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) {
-      return res.status(400).json({ message: 'Incorrect password' })
+      return res.status(400).json({ message: "Incorrect password" })
     }
     const token = generateToken(user._id)
     res.status(200).json({
@@ -70,13 +70,18 @@ export const login = async (req, res) => {
 
 export const getMyProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.userId).select('-password').populate({
-      path: 'posts',
-      select: 'media likes comments createdAt updatedAt',
-    })
+    const user = await User.findById(req.userId)
+      .select("-password")
+      .populate([
+        {
+          path: "posts",
+          select:
+            "media contentType caption likes comments createdAt updatedAt",
+        },
+      ])
 
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
     res.status(200).json(user)
   } catch (error) {
@@ -89,7 +94,7 @@ export const updateProfile = async (req, res) => {
     const { username, fullName, bio } = req.body
     const user = await User.findById(req.userId)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     const usernameExist = await User.findOne({
@@ -97,17 +102,17 @@ export const updateProfile = async (req, res) => {
       _id: { $ne: req.userId },
     })
     if (usernameExist) {
-      return res.status(400).json({ message: 'Username already taken' })
+      return res.status(400).json({ message: "Username already taken" })
     }
 
     if (req.file) {
       try {
         const uploadResult = await new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
+            { resource_type: "auto" },
             (error, result) => {
               if (error) {
-                reject(new Error('Failed to upload avatar: ' + error.message))
+                reject(new Error("Failed to upload avatar: " + error.message))
               } else {
                 resolve(result)
               }
@@ -121,7 +126,7 @@ export const updateProfile = async (req, res) => {
             await cloudinary.uploader.destroy(user.profilePicture.public_id)
           } catch (deleteError) {
             res.status(500).json({
-              message: 'Failed to delete old avatar: ' + deleteError.message,
+              message: "Failed to delete old avatar: " + deleteError.message,
             })
           }
         }
@@ -156,11 +161,11 @@ export const getFollowers = async (req, res) => {
   try {
     const { id } = req.params
     const data = await User.findById(id)
-      .select('followers following')
-      .populate('followers following', 'username fullName profilePicture')
+      .select("followers following")
+      .populate("followers following", "username fullName profilePicture")
 
     if (!data) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     res
@@ -174,19 +179,22 @@ export const getFollowers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params
-    const user = await User.findById(id).select('-password')
+    const user = await User.findById(id).select("-password").populate({
+      path: "posts",
+      select: "media likes comments createdAt updatedAt",
+    })
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     const requested = await Notification.findOne({
       user: id,
       sender: req.userId,
-      type: 'request',
+      type: "request",
     })
 
     const isFollowed = user.followers.includes(req.userId)
-    const currentUser = await User.findById(req.userId).select('blockedUsers')
+    const currentUser = await User.findById(req.userId).select("blockedUsers")
     const isBlocked =
       currentUser.blockedUsers.includes(id) ||
       user.blockedUsers.includes(req.userId)
@@ -204,25 +212,25 @@ export const sendFollowRequest = async (req, res) => {
     const { id } = req.params
     const user = await User.findById(id)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
     if (user.followers.includes(req.userId)) {
-      return res.status(400).json({ message: 'Already following this user' })
+      return res.status(400).json({ message: "Already following this user" })
     }
 
     const existingRequest = await Notification.findOne({
       user: id,
       sender: req.userId,
-      type: 'request',
+      type: "request",
     })
 
     if (existingRequest) {
-      return res.status(400).json({ message: 'Follow request already sent' })
+      return res.status(400).json({ message: "Follow request already sent" })
     }
 
     const currentUser = await User.findById(req.userId)
     if (currentUser.following.includes(id)) {
-      return res.status(400).json({ message: 'Already following this user' })
+      return res.status(400).json({ message: "Already following this user" })
     }
 
     if (!user.isPrivate) {
@@ -234,11 +242,11 @@ export const sendFollowRequest = async (req, res) => {
     const newNotification = new Notification({
       user: id,
       sender: req.userId,
-      type: user.isPrivate ? 'request' : 'follow',
+      type: user.isPrivate ? "request" : "follow",
     })
     await newNotification.save()
 
-    res.status(200).json({ message: 'Follow request sent' })
+    res.status(200).json({ message: "Follow request sent" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -250,10 +258,10 @@ export const cancelFollowRequest = async (req, res) => {
     await Notification.findOneAndDelete({
       user: id,
       sender: req.userId,
-      type: 'request',
+      type: "request",
     })
 
-    res.status(200).json({ message: 'Follow request cancelled' })
+    res.status(200).json({ message: "Follow request cancelled" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -264,13 +272,13 @@ export const acceptFollowRequest = async (req, res) => {
     const { id } = req.params
     const user = await User.findById(id)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     const currentUser = await User.findById(req.userId)
 
     if (currentUser.followers.includes(id)) {
-      return res.status(400).json({ message: 'Already followed by this user' })
+      return res.status(400).json({ message: "Already followed by this user" })
     }
 
     currentUser.followers.push(id)
@@ -281,10 +289,10 @@ export const acceptFollowRequest = async (req, res) => {
     await Notification.findOneAndDelete({
       user: req.userId,
       sender: id,
-      type: 'request',
+      type: "request",
     })
 
-    res.status(200).json({ message: 'Follow request accepted' })
+    res.status(200).json({ message: "Follow request accepted" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -296,10 +304,10 @@ export const declineFollowRequest = async (req, res) => {
     await Notification.findOneAndDelete({
       user: req.userId,
       sender: id,
-      type: 'request',
+      type: "request",
     })
 
-    res.status(200).json({ message: 'Follow request declined' })
+    res.status(200).json({ message: "Follow request declined" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -310,7 +318,7 @@ export const unfollowUser = async (req, res) => {
     const { id } = req.params
     const user = await User.findById(id)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
     const currentUser = await User.findById(req.userId)
 
@@ -327,10 +335,10 @@ export const unfollowUser = async (req, res) => {
     await Notification.findOneAndDelete({
       user: id,
       sender: req.userId,
-      type: 'follow',
+      type: "follow",
     })
 
-    res.status(200).json({ message: 'Unfollowed user successfully' })
+    res.status(200).json({ message: "Unfollowed user successfully" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -341,12 +349,12 @@ export const blockUser = async (req, res) => {
     const { id } = req.params
     const user = await User.findById(id)
     if (!user) {
-      return res.status(404).json({ message: 'User not found' })
+      return res.status(404).json({ message: "User not found" })
     }
 
     const currentUser = await User.findById(req.userId)
     if (currentUser.blockedUsers.includes(id)) {
-      return res.status(400).json({ message: 'User already blocked' })
+      return res.status(400).json({ message: "User already blocked" })
     }
 
     currentUser.blockedUsers.push(id)
@@ -367,7 +375,7 @@ export const blockUser = async (req, res) => {
     await currentUser.save()
     await user.save()
 
-    res.status(200).json({ message: 'User blocked successfully' })
+    res.status(200).json({ message: "User blocked successfully" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -382,7 +390,7 @@ export const unblockUser = async (req, res) => {
     )
     await currentUser.save()
 
-    res.status(200).json({ message: 'User unblocked successfully' })
+    res.status(200).json({ message: "User unblocked successfully" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -391,8 +399,8 @@ export const unblockUser = async (req, res) => {
 export const getSettingsData = async (req, res) => {
   try {
     const user = await User.findById(req.userId)
-      .select('blockedUsers isPrivate')
-      .populate('blockedUsers', 'username fullName profilePicture')
+      .select("blockedUsers isPrivate")
+      .populate("blockedUsers", "username fullName profilePicture")
 
     res.status(200).json(user)
   } catch (error) {
@@ -406,7 +414,7 @@ export const togglePrivacy = async (req, res) => {
     user.isPrivate = !user.isPrivate
     await user.save()
 
-    res.status(200).json({ message: 'Privacy setting updated' })
+    res.status(200).json({ message: "Privacy setting updated" })
   } catch (error) {
     res.status(500).json({ message: error.message })
   }
@@ -418,14 +426,131 @@ export const changePassword = async (req, res) => {
     const user = await User.findById(req.userId)
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
-      return res.status(400).json({ message: 'Current password is incorrect' })
+      return res.status(400).json({ message: "Current password is incorrect" })
     }
     const hashedPassword = await bcrypt.hash(newPassword, 10)
     user.password = hashedPassword
     await user.save()
 
-    res.status(200).json({ message: 'Password changed successfully' })
+    res.status(200).json({ message: "Password changed successfully" })
   } catch (error) {
     res.status(500).json({ message: error.message })
+  }
+}
+
+export const getAllUsersNotFollowing = async (req, res) => {
+  try {
+    if (!req.userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" })
+    }
+
+    const currentUser = await User.findById(req.userId).select("following")
+
+    if (!currentUser) {
+      return res.status(404).json({ success: false, message: "User not found" })
+    }
+
+    const users = await User.find({
+      _id: {
+        $ne: req.userId,
+        $nin: currentUser.following,
+      },
+    })
+      .select("_id username fullName profilePicture bio followers following")
+      .limit(20)
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    })
+  } catch (error) {
+    console.error("Error in getAllUsersNotFollowing:", error)
+    res.status(500).json({
+      success: false,
+      message: error.message || "Internal server error",
+    })
+  }
+}
+
+export const saveUnsavePost = async (req, res) => {
+  try {
+    const userId = req.userId
+    const { postId } = req.params
+
+    const user = await User.findById(userId)
+
+    if (!user) return res.status(404).json({ error: "User not found" })
+
+    const alreadySaved = user.savedPosts.includes(postId)
+
+    if (alreadySaved) {
+      await User.findByIdAndUpdate(userId, {
+        $pull: { savedPosts: postId },
+      })
+
+      return res.json({
+        message: "Post unsaved",
+        saved: false,
+      })
+    } else {
+      await User.findByIdAndUpdate(userId, {
+        $push: { savedPosts: postId },
+      })
+
+      return res.json({
+        message: "Post saved",
+        saved: true,
+      })
+    }
+  } catch (error) {
+    console.log("SAVE/UNSAVE POST ERROR:", error)
+    res.status(500).json({ error: "Server error" })
+  }
+}
+export const getSavedPostsForUser = async (req, res) => {
+  try {
+    const { userId } = req.params
+
+    const user = await User.findById(userId).populate({
+      path: "savedPosts",
+      populate: { path: "user", select: "username profilePicture" },
+    })
+
+    if (!user) return res.status(404).json({ message: "User not found" })
+
+    res.json({
+      success: true,
+      savedPosts: user.savedPosts,
+    })
+  } catch (error) {
+    console.error(error)
+    res.status(500).json({ success: false, message: "Server error" })
+  }
+}
+
+export const searchUsers = async (req, res) => {
+  try {
+    const { query } = req.query
+
+    if (!query) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Query is required" })
+    }
+
+    const users = await User.find({
+      $or: [
+        { username: { $regex: query, $options: "i" } },
+        { fullName: { $regex: query, $options: "i" } },
+      ],
+    }).select("username fullName profilePicture")
+
+    return res.status(200).json({
+      success: true,
+      users,
+    })
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ success: false, message: "Server Error" })
   }
 }

@@ -13,6 +13,7 @@ import User from './Pages/User.jsx'
 import Followers from './Pages/Followers'
 import Notifications from './Pages/Notifications.jsx'
 import Settings from './Pages/Settings.jsx'
+import Search from './Pages/Search.jsx' 
 
 function App() {
   return (
@@ -28,7 +29,9 @@ function App() {
 
         <Route path='/users/:id' element={<User />} />
         <Route path='/users/:id/followers' element={<Followers />} />
+        
         <Route path='/notifications' element={<Notifications />} />
+        <Route path='/search' element={<Search />} />
         <Route path='/settings' element={<Settings />} />
       </Route>
       <Route path='/login' element={<Login />} />

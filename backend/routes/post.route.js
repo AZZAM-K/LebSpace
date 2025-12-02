@@ -4,8 +4,11 @@ import {
   addPost,
   deletePost,
   editPost,
+  getAllPostsPriorityForFollowing,
   getCountOfLikes,
   getPostById,
+  getTaggedPosts,
+  
 } from "../controllers/post.controller.js"
 import { authenticate } from "../middleware/auth.js"
 import { upload } from "../config/uploader.js"
@@ -16,4 +19,7 @@ router.delete("/delete/:postId", authenticate, deletePost)
 router.get("/get-post/:postId", authenticate, getPostById)
 router.post("/like/:postId", authenticate, addLikeAndRemoveLike)
 router.get("/count-Likes/:postId", getCountOfLikes)
+router.get("/get-all-posts", authenticate, getAllPostsPriorityForFollowing)
+router.get("/get-tagged-posts/:userId", authenticate, getTaggedPosts)
+
 export default router
