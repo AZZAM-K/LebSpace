@@ -22,7 +22,6 @@ const Followers = () => {
       setError(result.message || 'Failed to load followers')
     }
     setPeople(result.data)
-    console.log('data:', result.data)
     setLoading(false)
   })
 
@@ -48,7 +47,6 @@ const Followers = () => {
 
   const data = activeTab === 'followers' ? people.followers : people.following
 
-  // Filter logic
   const filteredData = data.filter(
     u =>
       u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -157,7 +155,6 @@ const Followers = () => {
               ))}
             </div>
           ) : (
-            /* Empty State */
             <div className='flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300'>
               <div className='w-20 h-20 bg-[#161616] rounded-full flex items-center justify-center mb-4'>
                 <Users className='text-gray-600 w-10 h-10' />

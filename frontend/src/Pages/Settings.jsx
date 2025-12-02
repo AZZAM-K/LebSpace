@@ -19,10 +19,10 @@ import { AppContext } from "../Context/context"
 const Settings = () => {
   const {
     getSettingsData,
-    logout,
     togglePrivacy,
     changePassword,
     unblockUser,
+    deleteAccount,
   } = useContext(AppContext)
 
   const [isPrivate, setIsPrivate] = useState(false)
@@ -30,6 +30,7 @@ const Settings = () => {
     currentPassword: "",
     newPassword: "",
   })
+  const [deletePass, setDeletePass] = useState({ password: '' })
   const [blockedUsers, setBlockedUsers] = useState([])
   const [isBlockedListOpen, setIsBlockedListOpen] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -42,6 +43,7 @@ const Settings = () => {
   const [changing, setChanging] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [toggling, setToggling] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
 
   const fetchSettingsEvent = useEffectEvent(async () => {
     const result = await getSettingsData()
@@ -50,7 +52,6 @@ const Settings = () => {
     }
     setIsPrivate(result.data.isPrivate)
     setBlockedUsers(result.data.blockedUsers)
-    console.log("data:", result.data)
     setLoading(false)
   })
 
@@ -87,7 +88,7 @@ const Settings = () => {
         return
       }
       setChanging(true)
-      const res = await changePassword(passData)
+      const res = await changePassword(deletePass)
       if (res.success) {
         setPassMessage({ type: "", text: res.message })
       } else {
@@ -97,6 +98,21 @@ const Settings = () => {
       setPassMessage({ type: "error", text: error.message })
     } finally {
       setChanging(false)
+    }
+  }
+
+  const handleDeleteAccount = async e => {
+    e.preventDefault()
+    try {
+      setDeleting(true)
+      const res = await deleteAccount(deletePass)
+      if (!res.success) {
+        setDeleteError(res.message)
+      }
+    } catch (error) {
+      setDeleteError(error.message)
+    } finally {
+      setDeleting(false)
     }
   }
 
@@ -367,7 +383,6 @@ const Settings = () => {
             )}
           </div>
 
-          {/* 4. Delete Account (Danger Zone) */}
           <div className='border border-red-900/30 bg-red-900/5 rounded-2xl p-6 mt-10'>
             <div className='flex items-start justify-between'>
               <div>
@@ -381,7 +396,8 @@ const Settings = () => {
               </div>
               <button
                 onClick={() => setShowDeleteModal(true)}
-                className='px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg font-semibold text-sm hover:bg-red-500 hover:text-white transition-all'
+                className='px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-lg font-semibold text-sm
+                 hover:bg-red-500 hover:text-white transition-all'
               >
                 Delete Account
               </button>
@@ -398,12 +414,15 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* --- DELETE ACCOUNT MODAL --- */}
       {showDeleteModal && (
         <div className='fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm'>
           <div className='bg-[#181818] border border-gray-800 w-full max-w-md rounded-2xl p-6 shadow-2xl relative'>
             <button
-              onClick={() => setShowDeleteModal(false)}
+              onClick={() => {
+                setShowDeleteModal(false)
+                setDeletePass({ password: '' })
+                setDeleteError('')
+              }}
               className='absolute top-4 right-4 text-gray-500 hover:text-white'
             >
               <X size={20} />
@@ -424,38 +443,50 @@ const Settings = () => {
               </p>
             </div>
 
-            <div className='space-y-4'>
+            <form onSubmit={handleDeleteAccount} className='space-y-4'>
+              {deleteError && (
+                <div className='flex items-center gap-2 text-red-400 text-xs bg-red-500/10 p-3 rounded-lg border border-red-500/20'>
+                  <AlertTriangle size={14} className='shrink-0' />
+                  <span>{deleteError}</span>
+                </div>
+              )}
               <div className='space-y-1 text-left'>
                 <label className='text-xs font-medium text-gray-400 uppercase'>
                   Confirm Password
                 </label>
                 <input
                   type='password'
-                  value={deletePassword}
-                  onChange={e => setDeletePassword(e.target.value)}
+                  value={deletePass.password}
+                  onChange={e => setDeletePass({ password: e.target.value })}
                   className='w-full bg-black border border-gray-700 rounded-lg p-3 text-white focus:border-red-500
                    focus:ring-1 focus:ring-red-500 focus:outline-none transition-colors'
                   placeholder='Your password'
+                  required
                 />
               </div>
 
               <div className='flex gap-3 pt-2'>
                 <button
-                  onClick={() => setShowDeleteModal(false)}
+                  type='button'
+                  onClick={() => {
+                    setShowDeleteModal(false)
+                    setDeletePass({ password: '' })
+                    setDeleteError('')
+                  }}
                   className='flex-1 py-3 rounded-xl bg-gray-800 text-gray-300 font-semibold hover:bg-gray-700 transition'
                 >
                   Cancel
                 </button>
                 <button
-                  disabled={!deletePassword}
+                  type='submit'
+                  disabled={deleting}
                   className='flex-1 py-3 rounded-xl bg-red-600 text-white font-bold hover:bg-red-700 disabled:opacity-50
                    disabled:cursor-not-allowed transition shadow-lg shadow-red-900/20'
                 >
-                  Delete Forever
+                  {deleting ? 'Deleting....' : 'Delete Account'}
                 </button>
               </div>
-            </div>
-            
+            </form>
           </div>
         </div>
       )}

@@ -21,6 +21,7 @@ const User = () => {
     cancelFollowRequest,
     unfollowUser,
     blockUser,
+    createChat,
   } = useContext(AppContext)
   const navigate = useNavigate()
 
@@ -53,8 +54,6 @@ const User = () => {
     setRequested(result.data.requested)
     setFollowed(result.data.isFollowed)
     setBlocked(result.data.isBlocked)
-
-    console.log("data:", result.data)
     setLoading(false)
   })
 
@@ -126,6 +125,20 @@ const User = () => {
         return
       }
       setBlocked(true)
+    } catch (error) {
+      setError(error.message)
+    }
+  }
+
+  const handleMessage = async () => {
+    try {
+      const result = await createChat({ participantId: user._id })
+      if (!result.success) {
+        setError(result.message)
+        return
+      }
+
+      navigate(`/chat/${result.data.chatId}`)
     } catch (error) {
       setError(error.message)
     }
@@ -208,6 +221,7 @@ const User = () => {
 
                 {(followed || !user.isPrivate) && (
                   <button
+                    onClick={handleMessage}
                     className='flex-1 md:flex-none px-4 py-1.5 bg-gray-800 text-white font-semibold rounded-lg text-sm
                  hover:bg-gray-700 transition'
                   >

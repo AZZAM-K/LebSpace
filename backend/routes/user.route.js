@@ -34,9 +34,10 @@ router
   .get(authenticate, getMyProfile)
   .put(authenticate, upload.single("avatar"), updateProfile)
 
-router.get("/settings", authenticate, getSettingsData)
-router.put("/change-password", authenticate, changePassword)
-router.put("/privacy", authenticate, togglePrivacy)
+router.get('/settings', authenticate, getSettingsData)
+router.put('/change-password', authenticate, changePassword)
+router.put('/privacy', authenticate, togglePrivacy)
+router.delete('/delete', authenticate, deleteAccount)
 
 router.get("/get-users", authenticate, getAllUsersNotFollowing)
 router.get("/search", authenticate, searchUsers)

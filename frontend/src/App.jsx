@@ -14,6 +14,8 @@ import Followers from './Pages/Followers'
 import Notifications from './Pages/Notifications.jsx'
 import Settings from './Pages/Settings.jsx'
 import Search from './Pages/Search.jsx' 
+import Chat from './Pages/Chat.jsx'
+import Messages from './Pages/Messages.jsx'
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
         <Route path='/notifications' element={<Notifications />} />
         <Route path='/search' element={<Search />} />
         <Route path='/settings' element={<Settings />} />
+        <Route path='/chat/:id' element={<Chat />} />
+        <Route path='/messages' element={<Messages />} />
       </Route>
       <Route path='/login' element={<Login />} />
       <Route path='/signup' element={<SignUp />} />

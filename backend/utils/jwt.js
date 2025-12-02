@@ -7,7 +7,8 @@ export const generateToken = id => {
 
 export const verifyToken = token => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const slicedToken = token.replace('Bearer ', '')
+    const decoded = jwt.verify(slicedToken, process.env.JWT_SECRET)
     return decoded
   } catch (error) {
     return null

@@ -1,6 +1,7 @@
-import Post from "../models/Post.js"
-import User from "../models/User.js"
-import { cloudinary } from "../config/uploader.js"
+import Post from '../models/Post.js'
+import User from '../models/User.js'
+import Notification from '../models/Notification.js'
+import { cloudinary } from '../config/uploader.js'
 
 const uploadToCloudinary = (fileBuffer, type) => {
   return new Promise((resolve, reject) => {
@@ -17,7 +18,7 @@ const uploadToCloudinary = (fileBuffer, type) => {
 
 export const addPost = async (req, res) => {
   try {
-    const { contentType, caption, hashtags, taggedUsers } = req.body
+    const { contentType, caption } = req.body
     const userId = req.userId
     let mediaData = { url: "", public_id: "" }
 
@@ -50,7 +51,7 @@ export const addPost = async (req, res) => {
 export const editPost = async (req, res) => {
   try {
     const { postId } = req.params
-    const { caption, hashtags, taggedUsers, contentType } = req.body
+    const { caption, contentType } = req.body
     const userId = req.userId
 
     const post = await Post.findById(postId)
@@ -60,8 +61,6 @@ export const editPost = async (req, res) => {
       return res.status(403).json({ message: "Not authorized" })
 
     if (caption !== undefined) post.caption = caption
-    if (hashtags) post.hashtags = JSON.parse(hashtags)
-    if (taggedUsers) post.taggedUsers = JSON.parse(taggedUsers)
     if (contentType) post.contentType = contentType
 
     if (req.file) {
@@ -107,7 +106,9 @@ export const deletePost = async (req, res) => {
 
     await User.findByIdAndUpdate(userId, { $pull: { posts: postId } })
 
-    res.status(200).json({ message: "Post deleted successfully" })
+    await Notification.deleteMany({ post: postId })
+
+    res.status(200).json({ message: 'Post deleted successfully' })
   } catch (error) {
     console.error("Error deleting post:", error)
     res.status(500).json({ message: "Server error" })
@@ -126,7 +127,6 @@ export const getPostById = async (req, res) => {
           select: "username fullname profilePicture",
         },
       })
-      .populate("taggedUsers", "username fullname profilePicture")
 
     if (!post) return res.status(404).json({ message: "Post not found" })
 
@@ -151,9 +151,21 @@ export const addLikeAndRemoveLike = async (req, res) => {
     const hasLiked = likes.includes(userId)
 
     if (hasLiked) {
-      post.likes = post.likes.filter(id => id.toString() !== userId)
+      post.likes = post.likes.filter(id => id.toString() !== userId.toString())
+      await Notification.deleteOne({
+        sender: userId,
+        post: post._id,
+        type: 'like',
+      })
     } else {
       post.likes.push(userId)
+      const newNotification = new Notification({
+        user: post.user,
+        sender: userId,
+        post: post._id,
+        type: 'like',
+      })
+      await newNotification.save()
     }
 
     await post.save()

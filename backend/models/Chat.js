@@ -7,20 +7,7 @@ const ChatSchema = new mongoose.Schema(
     ],
 
     messages: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Message' }],
-
-    isGroupChat: { type: Boolean, default: false },
-
-    chatName: { type: String, default: '' },
-
-    latestMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
-
-    groupAdmin: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-
-    chatPicture: {
-      url: { type: String, default: '' },
-      public_id: { type: String, default: '' },
-    },
-    description: { type: String, default: '' },
+    lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: 'Message' },
   },
   { timestamps: true }
 )
