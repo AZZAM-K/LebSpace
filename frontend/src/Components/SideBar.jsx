@@ -1,16 +1,7 @@
-import { useContext } from "react"
-import {
-  Home,
-  Bell,
-  Search,
-  Mail,
-  Plus,
-  LogOut,
-  Settings,
-  User,
-} from "lucide-react"
-import { AppContext } from "../Context/context"
-import { Link, useNavigate, useLocation } from "react-router-dom"
+import { useContext } from 'react'
+import { Home, Bell, Search, Mail, Plus, LogOut, Settings } from 'lucide-react'
+import { AppContext } from '../Context/context'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 
 const MenuItem = ({ Icon, label, to, inPage }) => {
   return (
@@ -18,8 +9,8 @@ const MenuItem = ({ Icon, label, to, inPage }) => {
       to={to}
       className={`flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium cursor-pointer transition-all ${
         inPage
-          ? "bg-[#F65C21]/10 text-[#F65C21]"
-          : "text-gray-400 hover:text-white hover:bg-gray-900"
+          ? 'bg-[#F65C21]/10 text-[#F65C21]'
+          : 'text-gray-400 hover:text-white hover:bg-gray-900'
       }`}
     >
       <Icon size={22} />
@@ -35,12 +26,12 @@ const SideBar = () => {
 
   const handleLogout = () => {
     logout()
-    navigate("/login")
+    navigate('/login')
   }
   const userAvatarUrl =
     user?.img ||
     `https://ui-avatars.com/api/?name=${
-      user?.username || "User"
+      user?.username || 'User'
     }&background=random&color=fff&size=40`
 
   return (
@@ -61,33 +52,34 @@ const SideBar = () => {
             Icon={Home}
             label='Home'
             to='/'
-            inPage={location.pathname === "/"}
+            inPage={location.pathname === '/'}
           />
           <MenuItem
             Icon={Bell}
             label='Notifications'
             to='/notifications'
-            inPage={location.pathname === "/notifications"}
+            inPage={location.pathname === '/notifications'}
           />
 
           <MenuItem
             Icon={Mail}
             label='Messages'
             to='/messages'
-            inPage={location.pathname === "/messages"}
+            inPage={location.pathname === '/messages'}
           />
           <MenuItem
             Icon={Settings}
             label='Settings'
             to='/settings'
-            inPage={location.pathname === "/settings"}
+            inPage={location.pathname === '/settings'}
           />
         </div>
 
         <div className='border-t border-gray-800 pt-4'>
           <button
             onClick={handleLogout}
-            className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
+            className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500
+             hover:bg-red-500/10 transition-all w-full text-left'
           >
             <LogOut size={22} />
             <span>Log Out</span>
@@ -103,43 +95,43 @@ const SideBar = () => {
  md:hidden shadow-[0_-4px_25px_rgba(0,0,0,0.4)]'
         >
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate('/')}
             className={`flex flex-col items-center transition transform active:scale-90 
-     ${location.pathname === "/" ? "text-orange-500" : "text-gray-400"}`}
+     ${location.pathname === '/' ? 'text-orange-500' : 'text-gray-400'}`}
           >
             <Home size={32} />
           </button>
 
           <button
-            onClick={() => navigate("/search")}
+            onClick={() => navigate('/search')}
             className={`flex flex-col items-center transition transform active:scale-90
-     ${location.pathname === "/search" ? "text-orange-500" : "text-gray-400"}`}
+     ${location.pathname === '/search' ? 'text-orange-500' : 'text-gray-400'}`}
           >
             <Search size={32} />
           </button>
 
           <button
-            onClick={() => navigate("/add-post")}
+            onClick={() => navigate('/add-post')}
             className={`flex flex-col items-center transition transform active:scale-90
      ${
-       location.pathname === "/add-post" ? "text-orange-500" : "text-gray-400"
+       location.pathname === '/add-post' ? 'text-orange-500' : 'text-gray-400'
      }`}
           >
             <Plus size={32} />
           </button>
 
           <button
-            onClick={() => navigate("/messages")}
+            onClick={() => navigate('/messages')}
             className={`flex flex-col items-center transition transform active:scale-90
      ${
-       location.pathname === "/messages" ? "text-orange-500" : "text-gray-400"
+       location.pathname === '/messages' ? 'text-orange-500' : 'text-gray-400'
      }`}
           >
             <Mail size={32} />
           </button>
 
           <button
-            onClick={() => navigate("/profile")}
+            onClick={() => navigate('/profile')}
             className={`
     flex flex-col items-center justify-center
     transition-transform duration-150
@@ -147,19 +139,19 @@ const SideBar = () => {
     border-2
     rounded-full
     ${
-      location.pathname === "/profile" ? "border-orange-500" : "border-gray-400"
+      location.pathname === '/profile' ? 'border-orange-500' : 'border-gray-400'
     }
   `}
           >
             <img
               src={userAvatarUrl}
-              alt={user?.username || "User Profile"}
+              alt={user?.username || 'User Profile'}
               className={`
       w-10 h-10 rounded-full object-cover
       ${
-        location.pathname === "/profile"
-          ? "border-2 border-orange-500"
-          : "border-2 border-gray-400"
+        location.pathname === '/profile'
+          ? 'border-2 border-orange-500'
+          : 'border-2 border-gray-400'
       }
     `}
             />

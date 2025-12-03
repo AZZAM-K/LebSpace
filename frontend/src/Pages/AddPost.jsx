@@ -1,69 +1,9 @@
 import { useEffect, useState, useRef, useContext } from 'react'
 import { AppContext } from '../Context/context'
 import { useNavigate } from 'react-router'
+import { Trash2, ChevronLeft, Image } from 'lucide-react'
 
-const IconBack = ({ className = 'w-6 h-6' }) => (
-  <svg
-    className={className}
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-  >
-    <path
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M15 19l-7-7 7-7'
-    />
-  </svg>
-)
-const IconNext = ({ className = 'w-6 h-6' }) => (
-  <svg
-    className={className}
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-  >
-    <path
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M9 5l7 7-7 7'
-    />
-  </svg>
-)
-const IconTrash = ({ className = 'w-5 h-5' }) => (
-  <svg
-    className={className}
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-  >
-    <path
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M3 6h18M8 6v12a2 2 0 002 2h4a2 2 0 002-2V6M10 11v6M14 11v6'
-    />
-  </svg>
-)
-const IconChange = ({ className = 'w-5 h-5' }) => (
-  <svg
-    className={className}
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-  >
-    <path
-      strokeWidth='2'
-      strokeLinecap='round'
-      strokeLinejoin='round'
-      d='M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z'
-    />
-  </svg>
-)
-
-const AddPostMobile = ({ onClose }) => {
+const AddPost = ({ onClose }) => {
   const { addPost } = useContext(AppContext)
 
   const fileRef = useRef(null)
@@ -72,10 +12,6 @@ const AddPostMobile = ({ onClose }) => {
   const [mediaFile, setMediaFile] = useState(null)
   const [preview, setPreview] = useState(null)
   const [caption, setCaption] = useState('')
-  const [hashtags, setHashtags] = useState([])
-  const [tagInput, setTagInput] = useState('')
-  const [hashtagInput, setHashtagInput] = useState('')
-  const [taggedUsers, setTaggedUsers] = useState([])
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
 
@@ -120,34 +56,9 @@ const AddPostMobile = ({ onClose }) => {
     setPreview(null)
   }
 
-  const addHashtag = () => {
-    const val = hashtagInput.trim()
-    if (!val) return
-    const cleaned = val.replace(/^#/, '')
-    if (!hashtags.includes(cleaned)) {
-      setHashtags(prev => [...prev, cleaned])
-      setHashtagInput('')
-    } else setHashtagInput('')
-  }
-
-  const removeHashtag = t => setHashtags(prev => prev.filter(x => x !== t))
-
-  const addTaggedUser = () => {
-    const val = tagInput.trim()
-    if (!val) return
-    const cleaned = val.replace(/^@/, '')
-    if (!taggedUsers.includes(cleaned)) {
-      setTaggedUsers(prev => [...prev, cleaned])
-      setTagInput('')
-    } else setTagInput('')
-  }
-
-  const removeTaggedUser = u =>
-    setTaggedUsers(prev => prev.filter(x => x !== u))
-
   const nextStep = () => {
     if (step === 1) {
-      if (!mediaFile && contentType !== 'text') {
+      if (!mediaFile) {
         setMessage('Please select an image or video first.')
         return
       }
@@ -171,7 +82,7 @@ const AddPostMobile = ({ onClose }) => {
   }
 
   const handleSubmit = async () => {
-    if (!mediaFile && contentType !== 'text') {
+    if (!mediaFile) {
       setMessage('Please add media or switch to text type.')
       return
     }
@@ -182,8 +93,6 @@ const AddPostMobile = ({ onClose }) => {
       form.append('contentType', contentType)
       if (mediaFile) form.append('media', mediaFile)
       form.append('caption', caption)
-      form.append('hashtags', JSON.stringify(hashtags))
-      form.append('taggedUsers', JSON.stringify(taggedUsers))
       const result = await addPost(form)
       setLoading(false)
       if (result?.success) {
@@ -191,8 +100,6 @@ const AddPostMobile = ({ onClose }) => {
         setMediaFile(null)
         setPreview(null)
         setCaption('')
-        setHashtags([])
-        setTaggedUsers([])
         setStep(1)
         setTimeout(() => onClose && onClose(), 700)
       } else {
@@ -200,7 +107,7 @@ const AddPostMobile = ({ onClose }) => {
       }
     } catch (err) {
       setLoading(false)
-      setMessage('Error uploading post.')
+      setMessage(err.message || 'Error uploading post.')
     }
   }
 
@@ -220,7 +127,7 @@ const AddPostMobile = ({ onClose }) => {
           className='p-2 rounded-full hover:bg-white/5 transition'
           aria-label='Back'
         >
-          <IconBack />
+          <ChevronLeft />
         </button>
 
         <div className='flex items-center gap-2'>
@@ -243,7 +150,10 @@ const AddPostMobile = ({ onClose }) => {
           <div className='w-full h-full flex flex-col items-center justify-start'>
             <div className='w-full max-w-md mx-auto h-[60vh] mt-4 relative'>
               {!preview ? (
-                <div className='w-full h-full rounded-lg border border-dashed border-gray-700 bg-linear-to-b from-black/40 to-black/60 flex flex-col items-center justify-center gap-4 p-6'>
+                <div
+                  className='w-full h-full rounded-lg border border-dashed border-gray-700 bg-linear-to-b from-black/40
+                 to-black/60 flex flex-col items-center justify-center gap-4 p-6'
+                >
                   <div className='text-center'>
                     <div className='mb-3 text-2xl font-bold'>
                       Add Photo or Video
@@ -259,16 +169,6 @@ const AddPostMobile = ({ onClose }) => {
                       className='bg-orange-500 text-black font-semibold px-4 py-2 rounded-lg'
                     >
                       Select
-                    </button>
-
-                    <button
-                      onClick={() => {
-                        setContentType('text')
-                        setStep(2)
-                      }}
-                      className='bg-white/5 text-white px-4 py-2 rounded-lg'
-                    >
-                      Create Text Post
                     </button>
                   </div>
                 </div>
@@ -294,7 +194,7 @@ const AddPostMobile = ({ onClose }) => {
                       title='Change'
                       className='bg-white/6 p-2 rounded-full cursor-pointer hover:bg-white/8 transition'
                     >
-                      <IconChange className='w-5 h-5 text-white' />
+                      <Image className='w-5 h-5 text-white' />
                     </button>
 
                     <button
@@ -302,7 +202,7 @@ const AddPostMobile = ({ onClose }) => {
                       className='bg-white/6 p-2 rounded-full hover:bg-white/8 transition'
                       title='Remove'
                     >
-                      <IconTrash className='w-5 h-5 text-white' />
+                      <Trash2 className='w-5 h-5 text-white' />
                     </button>
                   </div>
                 </>
@@ -340,7 +240,7 @@ const AddPostMobile = ({ onClose }) => {
                     top.appendChild(el)
                     document.body.appendChild(top)
                   }}
-                  className='w-full bg-white/5 text-white py-2 rounded-lg'
+                  className='w-full bg-white/5 text-white p-2 rounded-lg cursor-pointer'
                 >
                   Open Preview
                 </button>
@@ -377,72 +277,9 @@ const AddPostMobile = ({ onClose }) => {
                   value={caption}
                   onChange={e => setCaption(e.target.value)}
                   placeholder='Write a caption...'
-                  className='w-full resize-none bg-transparent text-white placeholder-gray-400 border border-gray-700 rounded-lg p-3 focus:outline-none'
+                  className='w-full resize-none bg-transparent text-white placeholder-gray-400 border border-gray-700
+                   rounded-lg p-3 focus:outline-none'
                 />
-              </div>
-            </div>
-
-            <div className='mt-4'>
-              <div className='flex gap-2'>
-                <input
-                  value={hashtagInput}
-                  onChange={e => setHashtagInput(e.target.value)}
-                  onKeyDown={e =>
-                    e.key === 'Enter' && (e.preventDefault(), addHashtag())
-                  }
-                  placeholder='Add hashtag (press Enter)'
-                  className='flex-1 bg-gray-800 text-white placeholder-gray-400 px-3 py-2 rounded-lg border border-gray-700 focus:outline-none'
-                />
-                <button
-                  onClick={addHashtag}
-                  className='bg-orange-500 px-4 rounded-lg font-semibold'
-                >
-                  Add
-                </button>
-              </div>
-
-              <div className='flex gap-2 flex-wrap mt-3'>
-                {hashtags.map(h => (
-                  <button
-                    key={h}
-                    onClick={() => removeHashtag(h)}
-                    className='bg-orange-600 text-black px-3 py-1 rounded-full text-sm'
-                  >
-                    #{h} ✕
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className='mt-4'>
-              <div className='flex gap-2'>
-                <input
-                  value={tagInput}
-                  onChange={e => setTagInput(e.target.value)}
-                  onKeyDown={e =>
-                    e.key === 'Enter' && (e.preventDefault(), addTaggedUser())
-                  }
-                  placeholder='Tag user (press Enter)'
-                  className='flex-1 bg-gray-800 text-white placeholder-gray-400 px-3 py-2 rounded-lg border border-gray-700 focus:outline-none'
-                />
-                <button
-                  onClick={addTaggedUser}
-                  className='bg-yellow-500 px-4 rounded-lg font-semibold'
-                >
-                  Tag
-                </button>
-              </div>
-
-              <div className='flex gap-2 flex-wrap mt-3'>
-                {taggedUsers.map(u => (
-                  <button
-                    key={u}
-                    onClick={() => removeTaggedUser(u)}
-                    className='bg-yellow-600 text-black px-3 py-1 rounded-full text-sm'
-                  >
-                    @{u} ✕
-                  </button>
-                ))}
               </div>
             </div>
 
@@ -474,4 +311,4 @@ const AddPostMobile = ({ onClose }) => {
   )
 }
 
-export default AddPostMobile
+export default AddPost

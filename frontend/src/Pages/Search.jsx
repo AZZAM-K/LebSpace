@@ -1,21 +1,21 @@
-import React, { useContext, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { AppContext } from "../Context/context"
+import { useContext, useState } from 'react'
+import { useNavigate } from 'react-router'
+import { AppContext } from '../Context/context'
 import {
   Search as SearchIcon,
   ArrowRight,
   XCircle,
   Loader2,
-} from "lucide-react"
+} from 'lucide-react'
 
 const Search = () => {
   const { searchUsers } = useContext(AppContext)
   const navigate = useNavigate()
 
-  const [query, setQuery] = useState("")
+  const [query, setQuery] = useState('')
   const [results, setResults] = useState([])
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
 
   const handleSearch = async e => {
     const value = e.target.value
@@ -23,27 +23,25 @@ const Search = () => {
 
     if (!value.trim()) {
       setResults([])
-      setError("")
+      setError('')
       return
     }
 
     setLoading(true)
-    setError("")
+    setError('')
 
     try {
       const res = await searchUsers(value)
 
       if (!res.success) {
-        console.error("Search error:", res.message)
-        setError(res.message || "Failed to fetch results.")
+        setError(res.message || 'Failed to fetch results.')
         setResults([])
         return
       }
 
       setResults(res.data || [])
     } catch (err) {
-      console.error("Unexpected error:", err)
-      setError("An unexpected error occurred during search.")
+      setError(err.message || 'An unexpected error occurred during search.')
       setResults([])
     } finally {
       setLoading(false)
@@ -51,15 +49,13 @@ const Search = () => {
   }
 
   const clearSearch = () => {
-    setQuery("")
+    setQuery('')
     setResults([])
-    setError("")
+    setError('')
   }
 
   return (
     <div className='p-8 w-full md:w-[90%]  mx-auto font-sans'>
-     
-
       <div className='relative mb-6'>
         <input
           type='text'
@@ -121,13 +117,12 @@ const Search = () => {
           >
             <div className='flex items-center gap-4'>
               <img
-                src={user.profilePicture?.url || "/default.jpg"}
+                src={user.profilePicture?.url || '/default.jpg'}
                 alt={`${user.fullName}'s profile`}
                 className='w-14 h-14 rounded-full object-cover border-2 border-orange-700 '
-                style={{ border: "2px solid #ea580c" }}
+                style={{ border: '2px solid #ea580c' }}
               />
 
-              {/* User Text Info */}
               <div className='flex flex-col'>
                 <p className='font-semibold text-white text-lg'>
                   {user.fullName}
@@ -135,8 +130,6 @@ const Search = () => {
                 <p className='text-sm text-gray-500'>@{user.username}</p>
               </div>
             </div>
-
-            {/* Navigation Arrow */}
             <ArrowRight size={20} className='text-orange-600' />
           </div>
         ))}

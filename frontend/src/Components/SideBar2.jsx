@@ -1,27 +1,26 @@
-import React, { useState, useEffect, useContext, useCallback } from 'react'
+import { useState, useEffect, useContext, useCallback } from 'react'
 import { AppContext } from '../Context/context'
 import { Link } from 'react-router-dom'
 import { UserPlus, Loader2 } from 'lucide-react'
 
 const SideBar2 = () => {
-  const { getUserNotFollowing, sendFollowRequest, user } = useContext(AppContext)
-  
+  const { getUserNotFollowing, sendFollowRequest, user } =
+    useContext(AppContext)
+
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showMore, setShowMore] = useState(false)
   const [followingStatus, setFollowingStatus] = useState({})
 
-  // Load suggested users
   useEffect(() => {
     const loadSuggestions = async () => {
       try {
         setLoading(true)
         setError('')
         const result = await getUserNotFollowing()
-        
+
         if (result.success) {
-          // Limit to 6 suggestions and shuffle them
           const shuffled = result.data
             .sort(() => Math.random() - 0.5)
             .slice(0, 6)
@@ -41,16 +40,14 @@ const SideBar2 = () => {
     }
   }, [getUserNotFollowing, user])
 
-  // Handle follow user
   const handleFollowUser = useCallback(
     async userId => {
       try {
         setFollowingStatus(prev => ({ ...prev, [userId]: 'loading' }))
         const result = await sendFollowRequest(userId)
-        
+
         if (result.success) {
           setFollowingStatus(prev => ({ ...prev, [userId]: 'following' }))
-          // Remove user from suggestions after following
           setTimeout(() => {
             setSuggestions(prev => prev.filter(u => u._id !== userId))
           }, 600)
@@ -86,12 +83,10 @@ const SideBar2 = () => {
         z-20
       '
     >
-      {/* Header */}
       <h2 className='text-2xl font-bold mb-6 text-white tracking-wide'>
         Suggested for you
       </h2>
 
-      {/* Loading State */}
       {loading ? (
         <div className='flex flex-col items-center justify-center py-8'>
           <Loader2 className='w-8 h-8 animate-spin text-orange-500 mb-2' />
@@ -107,10 +102,10 @@ const SideBar2 = () => {
         </div>
       ) : (
         <>
-          {/* Suggestions List */}
           <div className='space-y-4'>
             {visibleUsers.map(suggestedUser => {
-              const isFollowing = followingStatus[suggestedUser._id] === 'following'
+              const isFollowing =
+                followingStatus[suggestedUser._id] === 'following'
               const isLoading = followingStatus[suggestedUser._id] === 'loading'
 
               return (
@@ -118,7 +113,6 @@ const SideBar2 = () => {
                   key={suggestedUser._id}
                   className='flex items-center justify-between p-3 rounded-xl hover:bg-white/5 transition duration-200'
                 >
-                  {/* User Info */}
                   <Link
                     to={`/users/${suggestedUser._id}`}
                     className='flex items-center gap-3 flex-1 hover:opacity-80 transition'
@@ -142,17 +136,17 @@ const SideBar2 = () => {
                     </div>
                   </Link>
 
-                  {/* Follow Button */}
                   <button
                     onClick={() => handleFollowUser(suggestedUser._id)}
                     disabled={isFollowing || isLoading}
-                    className={`px-4 py-1.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md flex items-center gap-1 whitespace-nowrap ${
-                      isFollowing
-                        ? 'bg-gray-600 text-white cursor-default'
-                        : isLoading
-                        ? 'bg-orange-500/50 text-black'
-                        : 'bg-[#F65C21] text-black hover:opacity-90'
-                    }`}
+                    className={`px-4 py-1.5 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md flex items-center gap-1
+                     whitespace-nowrap ${
+                       isFollowing
+                         ? 'bg-gray-600 text-white cursor-default'
+                         : isLoading
+                         ? 'bg-orange-500/50 text-black'
+                         : 'bg-[#F65C21] text-black hover:opacity-90'
+                     }`}
                   >
                     {isLoading ? (
                       <>
@@ -173,11 +167,11 @@ const SideBar2 = () => {
             })}
           </div>
 
-          {/* See More/Less Button */}
           {suggestions.length > 5 && (
             <button
               onClick={() => setShowMore(!showMore)}
-              className='w-full text-center mt-6 text-orange-400 hover:text-orange-300 font-semibold transition py-2 rounded-lg hover:bg-white/5'
+              className='w-full text-center mt-6 text-orange-400 hover:text-orange-300 font-semibold transition py-2 rounded-lg
+               hover:bg-white/5'
             >
               {showMore ? '↑ See Less' : '↓ See More'}
             </button>
@@ -185,7 +179,6 @@ const SideBar2 = () => {
         </>
       )}
 
-      {/* Footer */}
       <hr className='border-white/10 my-6' />
       <div className='space-y-2 text-gray-400 text-xs text-center'>
         <p>© 2025 LebSpace</p>

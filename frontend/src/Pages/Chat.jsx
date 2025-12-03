@@ -38,7 +38,7 @@ const Chat = () => {
     if (!res.success) {
       setError(res.message || 'Failed to load chat')
     }
-    console.log(res.data)
+
     setUser(res.data.otherParticipant)
     setMessages(res.data.messages)
     await markMessagesAsRead(id)
@@ -144,7 +144,6 @@ const Chat = () => {
           setError(res.message)
           return
         }
-        console.log(res.data.msg)
         setMessages(prev =>
           prev.map(msg =>
             msg._id === editingMessageId
@@ -163,7 +162,6 @@ const Chat = () => {
           setError(res.message)
           return
         }
-        console.log(res.data)
         setMessages([...messages, res.data.msg])
       }
       setInputText('')

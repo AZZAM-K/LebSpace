@@ -1,6 +1,6 @@
-import { useState, useContext, useEffect, useEffectEvent } from "react"
-import { AppContext } from "../Context/context"
-import { Link, useParams, useNavigate } from "react-router"
+import { useState, useContext, useEffect, useEffectEvent } from 'react'
+import { AppContext } from '../Context/context'
+import { Link, useParams, useNavigate } from 'react-router'
 import {
   Grid,
   Tag,
@@ -10,7 +10,7 @@ import {
   Ban,
   Bookmark,
   Lock,
-} from "lucide-react"
+} from 'lucide-react'
 
 const User = () => {
   const { id } = useParams()
@@ -25,12 +25,12 @@ const User = () => {
   } = useContext(AppContext)
   const navigate = useNavigate()
 
-  const [error, setError] = useState("")
+  const [error, setError] = useState('')
   const [user, setUser] = useState(null)
   const [requested, setRequested] = useState(false)
   const [followed, setFollowed] = useState(false)
   const [blocked, setBlocked] = useState(false)
-  const [activeTab, setActiveTab] = useState("posts")
+  const [activeTab, setActiveTab] = useState('posts')
   const [loading, setLoading] = useState(true)
   const [isAction, setIsAction] = useState(false)
   const [isBlocking, setIsBlocking] = useState(false)
@@ -42,12 +42,12 @@ const User = () => {
 
   const fetchUserEvent = useEffectEvent(async () => {
     if (id === currentUser.id) {
-      navigate("/profile")
+      navigate('/profile')
     }
 
     const result = await getUserById(id)
     if (!result.success) {
-      setError(result.message || "Failed to load this user")
+      setError(result.message || 'Failed to load this user')
     }
 
     setUser(result.data.user)
@@ -204,18 +204,18 @@ const User = () => {
                    flex items-center justify-center gap-2
                     ${
                       !followed && !requested
-                        ? "bg-[#F65C21] hover:bg-orange-600 text-white"
-                        : "bg-gray-800 hover:bg-gray-700 text-white"
+                        ? 'bg-[#F65C21] hover:bg-orange-600 text-white'
+                        : 'bg-gray-800 hover:bg-gray-700 text-white'
                     }`}
                 >
                   {isAction ? (
                     <Loader2 className='w-4 h-4 animate-spin' />
                   ) : followed ? (
-                    "Following"
+                    'Following'
                   ) : requested ? (
-                    "Requested"
+                    'Requested'
                   ) : (
-                    "Follow"
+                    'Follow'
                   )}
                 </button>
 
@@ -308,43 +308,17 @@ const User = () => {
             <>
               <div className='flex justify-around md:justify-center gap-12 mb-4'>
                 <button
-                  onClick={() => setActiveTab("posts")}
+                  onClick={() => setActiveTab('posts')}
                   className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
                      transition-all
               ${
-                activeTab === "posts"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
+                activeTab === 'posts'
+                  ? 'border-white text-white'
+                  : 'text-gray-500 hover:text-gray-300'
               }`}
                 >
                   <Grid size={16} />
                   <span className='hidden sm:inline'>Posts</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("saved")}
-                  className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
-                     transition-all
-              ${
-                activeTab === "saved"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-                >
-                  <Bookmark size={16} />
-                  <span className='hidden sm:inline'>Saved</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab("tagged")}
-                  className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t border-transparent -mt-px
-                     transition-all
-              ${
-                activeTab === "tagged"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-                >
-                  <Tag size={16} />
-                  <span className='hidden sm:inline'>Tagged</span>
                 </button>
               </div>
 
@@ -357,11 +331,14 @@ const User = () => {
                       onClick={() => navigate(`/post/${post._id}`)}
                     >
                       <img
-                        src={post.media?.url || "/fallback-image.png"}
+                        src={post.media?.url || '/fallback-image.png'}
                         alt='Post'
                         className='w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:opacity-50'
                       />
-                      <div className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/30 text-white font-bold'>
+                      <div
+                        className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/30
+                       text-white font-bold'
+                      >
                         <div className='flex items-center gap-1'>
                           <Heart size={20} fill='white' />
                           <span>{post.likes?.length || 0}</span>

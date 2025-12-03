@@ -1,10 +1,9 @@
-import { useState, useContext, useEffect, useCallback } from "react"
-import { AppContext } from "../Context/context"
-import { Link, useNavigate } from "react-router"
+import { useState, useContext, useEffect, useCallback } from 'react'
+import { AppContext } from '../Context/context'
+import { Link, useNavigate } from 'react-router'
 import {
   Grid,
   Bookmark,
-  Tag,
   Heart,
   MessageCircle,
   Settings,
@@ -12,38 +11,37 @@ import {
   Loader2,
   AlertCircle,
   Share2,
-} from "lucide-react"
+} from 'lucide-react'
 
 const Profile = () => {
   const navigate = useNavigate()
   const { getMyProfile, getSavedPostsForUser } = useContext(AppContext)
 
-  // State Management
-  const [activeTab, setActiveTab] = useState("posts")
-  const [error, setError] = useState("")
+  const [activeTab, setActiveTab] = useState('posts')
+  const [error, setError] = useState('')
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const [savedPosts, setSavedPosts] = useState([])
   const [copyNotification, setCopyNotification] = useState(false)
 
-  const loadSavedPosts = async userId => {
-    if (!userId) return
-    console.log(userId)
-
-    try {
-      const result = await getSavedPostsForUser(userId)
-      console.log(result)
-
-      if (result.success) {
-        setSavedPosts(result.data)
-      }
-    } catch (err) {
-      console.error("Error loading saved posts:", err)
-    }
-  }
-
   useEffect(() => {
     let mounted = true
+
+    const loadSavedPosts = async userId => {
+      if (!userId) return
+      console.log(userId)
+
+      try {
+        const result = await getSavedPostsForUser(userId)
+        console.log(result)
+
+        if (result.success) {
+          setSavedPosts(result.data)
+        }
+      } catch (err) {
+        console.error('Error loading saved posts:', err)
+      }
+    }
 
     const loadProfile = async () => {
       try {
@@ -54,15 +52,15 @@ const Profile = () => {
 
         if (result?.success) {
           setUser(result.data)
-          setError("")
+          setError('')
 
           await loadSavedPosts(result.data._id)
         } else {
-          setError(result?.message || "Failed to load profile")
+          setError(result?.message || 'Failed to load profile')
         }
       } catch (err) {
         if (mounted) {
-          setError(err.message || "Error loading profile")
+          setError(err.message || 'Error loading profile')
         }
       } finally {
         if (mounted) setLoading(false)
@@ -71,7 +69,7 @@ const Profile = () => {
 
     loadProfile()
     return () => (mounted = false)
-  }, [getMyProfile])
+  }, [getMyProfile, getSavedPostsForUser])
 
   const sortedPosts = user?.posts
     ? [...user.posts].sort(
@@ -142,11 +140,12 @@ const Profile = () => {
     <div className='flex-1 relative'>
       <div className='min-h-screen bg-black text-white w-full pb-24 md:pb-10'>
         <div className='max-w-4xl mx-auto pt-6 md:pt-10 px-4 sm:px-6'>
-          {/* Profile Header */}
           <div className='flex flex-col md:flex-row items-start md:items-center gap-6 md:gap-12 mb-12'>
-            {/* Avatar */}
             <div className='shrink-0 mx-auto md:mx-0 relative'>
-              <div className='w-24 h-24 md:w-40 md:h-40 rounded-full p-[3px] bg-linear-to-tr from-orange-400 via-[#F65C21] to-orange-700'>
+              <div
+                className='w-24 h-24 md:w-40 md:h-40 rounded-full p-[3px] bg-linear-to-tr from-orange-400
+               via-[#F65C21] to-orange-700'
+              >
                 <img
                   src={
                     user?.profilePicture?.url ||
@@ -167,13 +166,15 @@ const Profile = () => {
                 <div className='flex gap-2 flex-wrap'>
                   <Link
                     to='/profile/edit'
-                    className='px-6 py-1.5 bg-[#F65C21] text-black font-semibold rounded-lg text-sm hover:bg-orange-500 transition duration-200'
+                    className='px-6 py-1.5 bg-[#F65C21] text-black font-semibold rounded-lg text-sm hover:bg-orange-500
+                     transition duration-200'
                   >
                     Edit Profile
                   </Link>
                   <button
                     onClick={handleShareProfile}
-                    className='px-4 py-1.5 bg-gray-800 text-white font-semibold rounded-lg text-sm hover:bg-gray-700 transition duration-200 flex items-center gap-2'
+                    className='px-4 py-1.5 bg-gray-800 text-white font-semibold rounded-lg text-sm hover:bg-gray-700
+                     transition duration-200 flex items-center gap-2'
                   >
                     <Share2 size={16} />
                     <span className='hidden sm:inline'>Share</span>
@@ -188,13 +189,16 @@ const Profile = () => {
                 </div>
               </div>
 
-              <div className='flex items-center justify-around md:justify-start gap-8 md:gap-10 text-sm md:text-base border-y md:border-none border-gray-800 py-4 md:py-2'>
+              <div
+                className='flex items-center justify-around md:justify-start gap-8 md:gap-10 text-sm md:text-base
+               border-y md:border-none border-gray-800 py-4 md:py-2'
+              >
                 <div className='text-center md:text-left'>
                   <span className='font-bold block md:inline text-white mr-1'>
                     {user?.posts?.length || 0}
                   </span>
                   <span className='text-gray-400'>
-                    post{user?.posts?.length !== 1 ? "s" : ""}
+                    post{user?.posts?.length !== 1 ? 's' : ''}
                   </span>
                 </div>
                 <Link
@@ -205,7 +209,7 @@ const Profile = () => {
                     {user?.followers?.length || 0}
                   </span>
                   <span className='text-gray-400'>
-                    follower{user?.followers?.length !== 1 ? "s" : ""}
+                    follower{user?.followers?.length !== 1 ? 's' : ''}
                   </span>
                 </Link>
                 <Link
@@ -245,41 +249,32 @@ const Profile = () => {
 
           <div className='border-t border-gray-800 flex justify-around md:justify-center gap-12 mb-4'>
             <button
-              onClick={() => setActiveTab("posts")}
-              className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t-2 border-transparent transition-colors duration-200 ${
-                activeTab === "posts"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
+              onClick={() => setActiveTab('posts')}
+              className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t-2 border-transparent
+               transition-colors duration-200 ${
+                 activeTab === 'posts'
+                   ? 'border-white text-white'
+                   : 'text-gray-500 hover:text-gray-300'
+               }`}
             >
               <Grid size={16} />
               <span className='hidden sm:inline'>Posts</span>
             </button>
             <button
-              onClick={() => setActiveTab("saved")}
-              className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t-2 border-transparent transition-colors duration-200 ${
-                activeTab === "saved"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
+              onClick={() => setActiveTab('saved')}
+              className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t-2 border-transparent
+               transition-colors duration-200 ${
+                 activeTab === 'saved'
+                   ? 'border-white text-white'
+                   : 'text-gray-500 hover:text-gray-300'
+               }`}
             >
               <Bookmark size={16} />
               <span className='hidden sm:inline'>Saved</span>
             </button>
-            <button
-              onClick={() => setActiveTab("tagged")}
-              className={`flex items-center gap-2 py-4 text-sm tracking-widest uppercase border-t-2 border-transparent transition-colors duration-200 ${
-                activeTab === "tagged"
-                  ? "border-white text-white"
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
-            >
-              <Tag size={16} />
-              <span className='hidden sm:inline'>Tagged</span>
-            </button>
           </div>
 
-          {activeTab === "posts" && (
+          {activeTab === 'posts' && (
             <>
               {sortedPosts.length > 0 ? (
                 <div className='grid grid-cols-3 gap-1 md:gap-6 animate-fade-in'>
@@ -289,7 +284,7 @@ const Profile = () => {
                       className='relative group aspect-square cursor-pointer bg-gray-900 overflow-hidden rounded-lg'
                       onClick={() => handlePostClick(post._id)}
                     >
-                      {post.contentType === "video" ? (
+                      {post.contentType === 'video' ? (
                         <>
                           <video
                             src={post.media?.url}
@@ -299,27 +294,28 @@ const Profile = () => {
                             loop
                             playsInline
                           />
-                          
-                          <div className='absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition'>
+
+                          <div
+                            className='absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white
+                           opacity-0 group-hover:opacity-100 transition'
+                          >
                             Video
                           </div>
                         </>
                       ) : (
                         <img
-                          src={post.media?.url || "/fallback-image.png"}
+                          src={post.media?.url || '/fallback-image.png'}
                           alt='Post'
                           className='w-full h-full object-cover transition duration-300 group-hover:scale-105'
                         />
                       )}
 
-                      {/* Overlay */}
-                      <div className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/40 text-white font-bold transition duration-200'>
+                      <div
+                        className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6
+                       bg-black/40 text-white font-bold transition duration-200'
+                      >
                         <div className='flex items-center gap-1'>
-                          <Heart
-                            size={20}
-                            fill='currentColor'
-                            className='text-red-500'
-                          />
+                          <Heart size={20} fill='currentColor' />
                           <span>{post.likes?.length || 0}</span>
                         </div>
                         <div className='flex items-center gap-1'>
@@ -352,7 +348,7 @@ const Profile = () => {
             </>
           )}
 
-          {activeTab === "saved" && (
+          {activeTab === 'saved' && (
             <>
               {savedPosts.length > 0 ? (
                 <div className='grid grid-cols-3 gap-1 md:gap-6 animate-fade-in'>
@@ -362,7 +358,7 @@ const Profile = () => {
                       className='relative group aspect-square cursor-pointer bg-gray-900 overflow-hidden rounded-lg'
                       onClick={() => handlePostClick(post._id)}
                     >
-                      {post.contentType === "video" ? (
+                      {post.contentType === 'video' ? (
                         <>
                           <video
                             src={post.media?.url}
@@ -370,19 +366,25 @@ const Profile = () => {
                             onMouseEnter={e => e.target.play()}
                             onMouseLeave={e => e.target.pause()}
                           />
-                          <div className='absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white opacity-0 group-hover:opacity-100 transition'>
+                          <div
+                            className='absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white opacity-0
+                           group-hover:opacity-100 transition'
+                          >
                             Video
                           </div>
                         </>
                       ) : (
                         <img
-                          src={post.media?.url || "/fallback-image.png"}
+                          src={post.media?.url || '/fallback-image.png'}
                           alt='Post'
                           className='w-full h-full object-cover transition duration-300 group-hover:scale-105'
                         />
                       )}
 
-                      <div className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/40 text-white font-bold transition duration-200'>
+                      <div
+                        className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6
+                       bg-black/40 text-white font-bold transition duration-200'
+                      >
                         <div className='flex items-center gap-1'>
                           <Heart
                             size={20}
@@ -412,21 +414,23 @@ const Profile = () => {
               )}
             </>
           )}
-
-          {activeTab === "tagged" && (
-            <div className='flex flex-col items-center justify-center py-20'>
-              <Tag size={48} className='text-gray-500 mb-4' />
-              <p className='text-gray-400'>
-                Posts you are tagged in will appear here
-              </p>
-            </div>
-          )}
         </div>
       </div>
 
       {copyNotification && (
-        <div className='fixed bottom-4 left-4 right-4 md:right-auto md:left-4 md:max-w-sm p-4 bg-green-500/20 text-green-300 border border-green-500/30 rounded-lg shadow-lg z-40 animate-fade-in'>
-          ✓ Profile link copied to clipboard!
+        <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4'>
+          <div className='bg-gray-900 border border-green-500/30 text-green-300 p-6 rounded-xl shadow-xl w-full max-w-sm'>
+            <p className='text-lg font-semibold mb-4'>
+              ✓ Profile link copied to clipboard!
+            </p>
+
+            <button
+              onClick={() => setCopyNotification(false)}
+              className='w-full py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition'
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       )}
     </div>

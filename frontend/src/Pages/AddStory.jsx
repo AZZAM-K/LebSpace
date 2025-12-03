@@ -1,5 +1,5 @@
-import { useContext, useState, useMemo, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useContext, useState, useMemo, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router'
 import { AppContext } from '../Context/context'
 import { UploadCloud, Image, Video, X } from 'lucide-react'
 
@@ -11,6 +11,7 @@ export default function AddStory() {
   const [file, setFile] = useState(null)
   const [loading, setLoading] = useState(false)
   const [previewUrl, setPreviewUrl] = useState(null)
+  const fileInputRef = useRef(null)
 
   const mediaType = useMemo(() => {
     if (!file) return null
@@ -58,23 +59,31 @@ export default function AddStory() {
   const handleRemoveFile = () => {
     setFile(null)
     setPreviewUrl(null)
-    document.getElementById('file-upload').value = ''
+    fileInputRef.current.value = null
   }
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-gray-950 text-white p-4'>
       <form
         onSubmit={handleSubmit}
-        className='w-full max-w-lg bg-neutral-900 p-6 sm:p-8 rounded-3xl space-y-8 shadow-2xl shadow-black/70 transition-all duration-500 transform hover:shadow-orange-600/10'
+        className='w-full max-w-lg bg-neutral-900 p-6 sm:p-8 rounded-3xl space-y-8 shadow-2xl shadow-black/70 transition-all
+         duration-500 transform hover:shadow-orange-600/10'
       >
-        <h1 className='text-3xl font-extrabold text-center bg-clip-text text-transparent bg-linear-to-r from-orange-400 to-red-500 pb-1 border-b border-neutral-700/50'>
+        <h1
+          className='text-3xl font-extrabold text-center bg-clip-text text-transparent bg-linear-to-r from-orange-400
+         to-red-500 pb-1 border-b border-neutral-700/50'
+        >
           Upload Your Story
         </h1>
 
-        <div className='relative border-2 border-dashed border-neutral-700 rounded-3xl p-6 transition-colors duration-300 hover:border-orange-500/80 group'>
+        <div
+          className='relative border-2 border-dashed border-neutral-700 rounded-3xl p-6 transition-colors duration-300
+         hover:border-orange-500/80 group'
+        >
           <input
             type='file'
             id='file-upload'
+            ref={fileInputRef}
             accept='image/*,video/*'
             onChange={handleFileChange}
             className='absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10'
@@ -83,7 +92,10 @@ export default function AddStory() {
 
           {file ? (
             <div className='flex flex-col items-center justify-center h-48 space-y-4'>
-              <div className='relative w-32 h-32 rounded-2xl overflow-hidden bg-neutral-800 flex items-center justify-center border-2 border-orange-500/50 p-0.5'>
+              <div
+                className='relative w-32 h-32 rounded-2xl overflow-hidden bg-neutral-800 flex items-center justify-center
+               border-2 border-orange-500/50 p-0.5'
+              >
                 <div className='w-full h-full rounded-xl overflow-hidden bg-neutral-700 flex items-center justify-center'>
                   {previewUrl &&
                     (mediaType === 'image' ? (

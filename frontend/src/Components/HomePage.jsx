@@ -1,29 +1,23 @@
-import React, { useEffect, useState, useContext } from "react"
-import { AppContext } from "../Context/context"
+import { useEffect, useState, useContext } from 'react'
+import { AppContext } from '../Context/context'
 import {
   Heart,
   MessageCircle,
-  Share2,
   Bookmark,
   AlertCircle,
   Sparkles,
   RefreshCcw,
-  MoreVertical,
   Clock,
-} from "lucide-react"
-import { Link } from "react-router-dom"
+} from 'lucide-react'
+import { Link } from 'react-router-dom'
 
 const HomePage = () => {
-  const {
-    getAllPostPriorityOfFollowing,
-    addLikeAndRemoveLike,
-    user,
-  } = useContext(AppContext)
+  const { getAllPostPriorityOfFollowing, addLikeAndRemoveLike, user } =
+    useContext(AppContext)
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [likedPosts, setLikedPosts] = useState(new Set())
-  const [savedPosts, setSavedPosts] = useState(new Set())
   const [likeAnimations, setLikeAnimations] = useState({})
   const [refreshing, setRefreshing] = useState(false)
   const handleRefresh = async () => {
@@ -44,14 +38,14 @@ const HomePage = () => {
 
       if (result.success) {
         const serverPosts = result.data.posts || []
+        console.log(serverPosts)
         setPosts(serverPosts)
 
         const liked = new Set()
 
         serverPosts.forEach(post => {
           post.likes?.forEach(like => {
-            const likeId = typeof like === "string" ? like : like?._id
-            if (String(likeId) === String(user?._id)) {
+            if (like === user?.id) {
               liked.add(post._id)
             }
           })
@@ -59,11 +53,11 @@ const HomePage = () => {
 
         setLikedPosts(liked)
       } else {
-        setError(result.message || "Failed to load posts")
+        setError(result.message || 'Failed to load posts')
       }
     } catch (err) {
       console.error(err)
-      setError(err.message || "Error")
+      setError(err.message || 'Error')
     } finally {
       setLoading(false)
     }
@@ -91,12 +85,10 @@ const HomePage = () => {
           if (isCurrentlyLiked) {
             return {
               ...p,
-              likes: p.likes.filter(
-                l => String(l?._id || l) !== String(user?._id)
-              ),
+              likes: p.likes.filter(l => l !== user?.id),
             }
           } else {
-            return { ...p, likes: [...p.likes, user?._id] }
+            return { ...p, likes: [...p.likes, user?.id] }
           }
         }
         return p
@@ -115,9 +107,7 @@ const HomePage = () => {
               p._id === postId ? { ...p, likes: updatedPost.likes } : p
             )
           )
-          const userIsLiked = updatedPost.likes.some(
-            l => String(l?._id || l) === String(user?._id)
-          )
+          const userIsLiked = updatedPost.likes.some(l => l === user?.id)
           setLikedPosts(prev => {
             const upd = new Set(prev)
             if (userIsLiked) upd.add(postId)
@@ -146,7 +136,7 @@ const HomePage = () => {
         )
       }
     } catch (err) {
-      console.error("Error toggling like:", err)
+      console.error('Error toggling like:', err)
       setLikedPosts(prev => {
         const updated = new Set(prev)
         if (isCurrentlyLiked) updated.add(postId)
@@ -175,13 +165,13 @@ const HomePage = () => {
     const diffHours = Math.floor(diffMs / 3600000)
     const diffDays = Math.floor(diffMs / 86400000)
 
-    if (diffMins < 1) return "now"
+    if (diffMins < 1) return 'now'
     if (diffMins < 60) return `${diffMins}m`
     if (diffHours < 24) return `${diffHours}h`
     if (diffDays < 7) return `${diffDays}d`
-    return postDate.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
+    return postDate.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
     })
   }
 
@@ -192,7 +182,7 @@ const HomePage = () => {
           <div className='relative w-16 h-16'>
             <div
               className='absolute inset-0 bg-linear-to-r from-orange-500 to-orange-600 rounded-full animate-spin'
-              style={{ animationDuration: "3s" }}
+              style={{ animationDuration: '3s' }}
             />
             <div className='absolute inset-2 bg-black rounded-full' />
             <Sparkles className='absolute inset-4 text-orange-500 animate-pulse' />
@@ -207,7 +197,10 @@ const HomePage = () => {
 
   return (
     <div className='mx-auto w-full max-w-full md:max-w-xl'>
-      <header className='flex items-center justify-between mb-4 px-3 py-2 bg-black/60 backdrop-blur rounded-2xl border border-gray-800 shadow-lg'>
+      <header
+        className='flex items-center justify-between mb-4 px-3 py-2 bg-black/60 backdrop-blur rounded-2xl border
+       border-gray-800 shadow-lg'
+      >
         <div className='flex items-center gap-3'>
           <Sparkles className='w-6 h-6 text-orange-400' />
           <h1 className='text-lg font-extrabold text-white tracking-tight'>
@@ -224,14 +217,17 @@ const HomePage = () => {
             title='Refresh'
           >
             <RefreshCcw
-              className={`w-5 h-5 ${refreshing ? "animate-spin" : ""}`}
+              className={`w-5 h-5 ${refreshing ? 'animate-spin' : ''}`}
             />
           </button>
         </div>
       </header>
 
       {error && (
-        <div className='mb-4 px-4 py-3 rounded-xl bg-red-600/10 border border-red-600/30 flex items-center gap-3 text-sm text-red-200'>
+        <div
+          className='mb-4 px-4 py-3 rounded-xl bg-red-600/10 border border-red-600/30
+         flex items-center gap-3 text-sm text-red-200'
+        >
           <AlertCircle className='w-5 h-5' />
           <div className='flex-1'>{error}</div>
           <button
@@ -245,27 +241,16 @@ const HomePage = () => {
 
       {posts.length === 0 ? (
         <div className='rounded-2xl bg-linear-to-b from-gray-900/40 to-black/20 p-8 text-center shadow-lg border border-gray-800'>
-          <div className='mx-auto w-20 h-20 rounded-full bg-linear-to-br from-orange-500/20 to-orange-600/20 flex items-center justify-center mb-4'>
+          <div
+            className='mx-auto w-20 h-20 rounded-full bg-linear-to-br from-orange-500/20 to-orange-600/20
+           flex items-center justify-center mb-4'
+          >
             <Sparkles className='w-10 h-10 text-orange-400' />
           </div>
           <h2 className='text-white font-bold text-xl'>Nothing to show</h2>
           <p className='text-gray-400 mt-2 mb-4'>
             Follow people or create your first post to populate your feed.
           </p>
-          <div className='flex justify-center gap-3'>
-            <Link
-              to='/explore'
-              className='px-4 py-2 bg-orange-500 text-black rounded-full font-semibold shadow hover:brightness-110'
-            >
-              Discover
-            </Link>
-            <Link
-              to='/create'
-              className='px-4 py-2 border border-gray-700 text-gray-200 rounded-full'
-            >
-              Create
-            </Link>
-          </div>
         </div>
       ) : (
         <div className='space-y-5'>
@@ -300,12 +285,8 @@ const HomePage = () => {
                     </div>
                   </div>
                 </div>
-                <button className='p-2 rounded-full hover:bg-white/5 text-gray-300'>
-                  <MoreVertical className='w-5 h-5' />
-                </button>
               </div>
 
-              {/* caption */}
               {post.caption && (
                 <div className='px-4 pb-2'>
                   <p className='text-sm text-gray-100'>
@@ -326,7 +307,7 @@ const HomePage = () => {
                   className='block relative px-4 pb-4'
                 >
                   <div className='overflow-hidden rounded-xl bg-black border border-gray-800 mx-auto max-w-[680px]'>
-                    {post.contentType === "video" ? (
+                    {post.contentType === 'video' ? (
                       <video
                         src={post.media.url}
                         className='w-full max-h-100 object-cover'
@@ -362,16 +343,16 @@ const HomePage = () => {
                     <Heart
                       className={`w-6 h-6 transition-transform ${
                         likedPosts.has(post._id)
-                          ? "text-orange-500 scale-110"
-                          : "text-gray-300 hover:text-white"
+                          ? 'text-orange-500 scale-110'
+                          : 'text-gray-300 hover:text-white'
                       }`}
-                      fill={likedPosts.has(post._id) ? "currentColor" : "none"}
+                      fill={likedPosts.has(post._id) ? 'currentColor' : 'none'}
                     />
                     <span
                       className={`text-xs ${
                         likedPosts.has(post._id)
-                          ? "text-orange-400"
-                          : "text-gray-300"
+                          ? 'text-orange-400'
+                          : 'text-gray-300'
                       }`}
                     >
                       {post.likes?.length || 0}
@@ -379,7 +360,7 @@ const HomePage = () => {
                   </button>
 
                   <Link
-                    to={`/post/${post._id}`}
+                    to={`/post/${post._id}/add-comment`}
                     className='flex items-center gap-2 text-gray-300 hover:text-white transition'
                     title='Comments'
                   >
@@ -388,13 +369,6 @@ const HomePage = () => {
                       {post.comments?.length || 0}
                     </span>
                   </Link>
-
-                  <button
-                    className='text-gray-300 hover:text-white transition'
-                    title='Share'
-                  >
-                    <Share2 className='w-5 h-5' />
-                  </button>
                 </div>
 
                 <div className='flex items-center gap-3'>
@@ -404,9 +378,9 @@ const HomePage = () => {
                   >
                     <Bookmark
                       className={`w-5 h-5 ${
-                        savedPosts.has(post._id) ? "text-orange-400" : ""
+                        post.isSaved ? 'text-orange-400' : ''
                       }`}
-                      fill={savedPosts.has(post._id) ? "currentColor" : "none"}
+                      fill={post.isSaved ? 'currentColor' : 'none'}
                     />
                   </button>
                 </div>
@@ -414,7 +388,7 @@ const HomePage = () => {
 
               <div className='px-4 pb-4 pt-2'>
                 <Link
-                  to={`/post/${post._id}`}
+                  to={`/post/${post._id}/add-comment`}
                   className='text-xs text-gray-400 hover:text-gray-200'
                 >
                   View all {post.comments?.length || 0} comments

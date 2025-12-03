@@ -11,7 +11,7 @@ const PostSchema = new mongoose.Schema(
 
     contentType: {
       type: String,
-      enum: ['image', 'video', 'text'],
+      enum: ['image', 'video'],
       required: true,
     },
 

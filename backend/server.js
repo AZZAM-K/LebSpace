@@ -67,12 +67,10 @@ io.on('connection', async socket => {
     io.emit('user:online', { userId })
 
     socket.on('join:chat', chatId => {
-      console.log('Joined room:', `chat:${chatId}`)
       socket.join(`chat:${chatId}`)
     })
 
     socket.on('leave:chat', chatId => {
-      console.log('Leaving room:', `chat:${chatId}`)
       socket.leave(`chat:${chatId}`)
     })
 

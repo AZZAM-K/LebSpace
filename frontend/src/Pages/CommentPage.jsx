@@ -56,7 +56,10 @@ const AllCommentsPage = () => {
 
   return (
     <div className='min-h-screen w-full bg-black text-white relative'>
-      <div className='sticky top-0 bg-black/70 backdrop-blur-xl flex items-center gap-4 px-4 py-4 border-b border-gray-800 z-20 shadow-md'>
+      <div
+        className='sticky top-0 bg-black/70 backdrop-blur-xl flex items-center gap-4 px-4 py-4 border-b border-gray-800 z-20
+       shadow-md'
+      >
         <button
           onClick={() => navigate(`/post/${postId}`)}
           className='p-2 hover:bg-gray-800 rounded-full transition cursor-pointer'
@@ -93,20 +96,14 @@ const AllCommentsPage = () => {
             <p className='mb-4 text-lg font-light tracking-wide'>
               No comments yet
             </p>
-
-            <Link
-              to={`/post/${postId}/add-comment`}
-              className='px-5 py-2.5 bg-orange-600 rounded-xl hover:bg-orange-700 transition shadow-md font-medium'
-            >
-              Add a comment
-            </Link>
           </div>
         ) : (
           <div className='space-y-6'>
             {comments.map(c => (
               <div
                 key={c._id}
-                className='relative flex items-start gap-3 bg-gray-900/40 p-3 rounded-xl border border-gray-800 hover:bg-gray-900/70 transition'
+                className='relative flex items-start gap-3 bg-gray-900/40 p-3 rounded-xl border border-gray-800
+                 hover:bg-gray-900/70 transition'
               >
                 <img
                   src={

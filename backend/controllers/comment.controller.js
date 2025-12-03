@@ -27,20 +27,22 @@ export const addComment = async (req, res) => {
 
     await newComment.save()
 
-    const newNotification = new Notification({
-      user: post.user,
-      sender: userId,
-      post: postId,
-      type: 'comment',
-    })
-    await newNotification.save()
+    if (post.user.toString() !== userId.toString()) {
+      const newNotification = new Notification({
+        user: post.user,
+        sender: userId,
+        post: postId,
+        type: 'comment',
+      })
+      await newNotification.save()
+    }
 
     post.comments.push(newComment._id)
     await post.save()
 
     const populatedComment = await Comment.findById(newComment._id).populate(
       'user',
-      'username fullname profilePicture'
+      'username fullName profilePicture'
     )
 
     return res.status(201).json({
@@ -57,7 +59,7 @@ export const getCommentsByPostId = async (req, res) => {
   try {
     const { postId } = req.params
     const comments = await Comment.find({ post: postId })
-      .populate('user', 'username fullname profilePicture')
+      .populate('user', 'username fullName profilePicture')
       .sort({ createdAt: -1 })
     return res.status(200).json({ success: true, comments })
   } catch (error) {

@@ -4,58 +4,10 @@ import {
   useContext,
   useCallback,
   useEffectEvent,
-} from "react"
-import { AppContext } from "../Context/context"
-import { Link } from "react-router-dom"
-import { Send } from "lucide-react"
-
-const CloseIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-    strokeLinecap='round'
-    strokeLinejoin='round'
-    className='w-6 h-6'
-  >
-    <line x1='18' y1='6' x2='6' y2='18'></line>
-    <line x1='6' y1='6' x2='18' y2='18'></line>
-  </svg>
-)
-
-const ViewersIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    viewBox='0 0 24 24'
-    fill='currentColor'
-    className='w-4 h-4'
-  >
-    <path d='M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z' />
-    <path
-      fillRule='evenodd'
-      d='M1.323 11.45L2.57 12a1 1 0 0 0 .86 1H21.57a1 1 0 0 0 .86-1l1.247-.55C22.25 10.95 19.33 5 12 5S1.75 10.95 1.323 11.45ZM21.57 13H2.57l1.095 1.05a12.872 12.872 0 0 0 16.66 0l1.095-1.05Z'
-      clipRule='evenodd'
-    />
-  </svg>
-)
-
-const UpArrowIcon = () => (
-  <svg
-    xmlns='http://www.w3.org/2000/svg'
-    viewBox='0 0 24 24'
-    fill='none'
-    stroke='currentColor'
-    strokeWidth='2'
-    strokeLinecap='round'
-    strokeLinejoin='round'
-    className='w-4 h-4'
-  >
-    <polyline points='12 19 12 5'></polyline>
-    <polyline points='5 12 12 5 19 12'></polyline>
-  </svg>
-)
+} from 'react'
+import { AppContext } from '../Context/context'
+import { Link } from 'react-router-dom'
+import { X, Eye, ArrowUp } from 'lucide-react'
 
 const StoryOverlay = ({
   stories,
@@ -108,8 +60,8 @@ const StoryOverlay = ({
       currentStory.viewers &&
       currentStory.viewers.length > 0
     ) {
-      console.log("Viewers data:", currentStory.viewers)
-      console.log("First viewer:", currentStory.viewers[0])
+      console.log('Viewers data:', currentStory.viewers)
+      console.log('First viewer:', currentStory.viewers[0])
       setViewersList(currentStory.viewers)
       setViewersModalOpen(true)
     } else {
@@ -167,11 +119,11 @@ const StoryOverlay = ({
       setMenuOpen(false)
       onClose()
     } else {
-      alert("Failed to delete story: " + result.message)
+      alert('Failed to delete story: ' + result.message)
     }
   }
 
-  if (!user || !token) return <div style={{ color: "white" }}>Loading...</div>
+  if (!user || !token) return <div style={{ color: 'white' }}>Loading...</div>
   if (!story) return null
   console.log(viewCount)
   return (
@@ -193,13 +145,13 @@ const StoryOverlay = ({
                 className='h-1 bg-white rounded-full'
                 style={
                   index < currentIndex
-                    ? { width: "100%" }
+                    ? { width: '100%' }
                     : index === currentIndex
                     ? {
                         width: `${progress}%`,
-                        transition: "width 0.05s linear",
+                        transition: 'width 0.05s linear',
                       }
-                    : { width: "0%" }
+                    : { width: '0%' }
                 }
               />
             </div>
@@ -211,7 +163,7 @@ const StoryOverlay = ({
             <Link
               to={
                 story?.user?._id?.toString() === user?.id?.toString()
-                  ? "/profile"
+                  ? '/profile'
                   : `/users/${story?.user?._id}`
               }
               className='flex items-center mt-1 gap-3 cursor-pointer z-50 relative'
@@ -256,7 +208,8 @@ const StoryOverlay = ({
 
                 {menuOpen && (
                   <div
-                    className='absolute right-0 top-10 w-40 bg-black/95 backdrop-blur-sm border border-white/20 rounded-lg shadow-lg z-50'
+                    className='absolute right-0 top-10 w-40 bg-black/95 backdrop-blur-sm border border-white/20
+                     rounded-lg shadow-lg z-50'
                     onClick={e => e.stopPropagation()}
                   >
                     <button
@@ -286,7 +239,7 @@ const StoryOverlay = ({
               }}
               className='text-white p-2 opacity-80 hover:opacity-100 transition z-50'
             >
-              <CloseIcon />
+              <X />
             </button>
           </div>
         </div>
@@ -303,29 +256,18 @@ const StoryOverlay = ({
         </div>
 
         <div className='absolute bottom-0 left-0 right-0 p-4 z-40'>
-          {isCurrentUserStory ? (
+          {isCurrentUserStory && (
             <div
               className='text-white text-center opacity-90 hover:opacity-100 cursor-pointer'
               onClick={openViewers}
             >
               <div className='flex justify-center mb-1'>
-                <UpArrowIcon />
+                <ArrowUp />
               </div>
               <div className='text-sm gap-2 font-semibold flex items-center justify-center'>
-                <ViewersIcon className='mr-2' />
+                <Eye className='mr-2' />
                 <div>{viewCount} Views</div>
               </div>
-            </div>
-          ) : (
-            <div className='flex items-center space-x-3'>
-              <input
-                type='text'
-                placeholder='Send message...'
-                className='w-full bg-white/20 border border-white/40 rounded-full py-2 px-4 text-white placeholder-gray-300 focus:outline-none focus:ring-1 focus:ring-white'
-              />
-              <button className='text-white p-2'>
-                <Send className='text-xl' />
-              </button>
             </div>
           )}
         </div>
@@ -346,7 +288,7 @@ const StoryOverlay = ({
                   >
                     <img
                       src={
-                        (typeof v.profilePicture === "object"
+                        (typeof v.profilePicture === 'object'
                           ? v.profilePicture?.url
                           : v.profilePicture) ||
                         v.img ||
@@ -355,7 +297,7 @@ const StoryOverlay = ({
                       className='w-10 h-10 rounded-full object-cover'
                       alt={v.username}
                     />
-                    <span>{v.username}</span>
+                    <span>{v._id === user.id ? 'You' : v.username}</span>
                   </div>
                 ))
               ) : (
@@ -399,7 +341,6 @@ const Story = () => {
       const followingRes = await getFollowingStories()
       const fetched = followingRes?.data || []
 
-      // GROUP STORIES BY USER
       const grouped = Object.values(
         fetched.reduce((acc, st) => {
           const id = st.user._id
@@ -423,7 +364,7 @@ const Story = () => {
 
       setOtherStories(grouped)
     } catch (err) {
-      console.error("Error fetching stories:", err)
+      console.error('Error fetching stories:', err)
       setMyStories([])
       setOtherStories([])
     } finally {
@@ -440,7 +381,7 @@ const Story = () => {
     const viewers = story.viewers ?? []
     return viewers.some(v => {
       const vid =
-        typeof v === "string" ? v : v?._id ? v._id.toString() : v?.toString?.()
+        typeof v === 'string' ? v : v?._id ? v._id.toString() : v?.toString?.()
       return vid === userId?.toString()
     })
   }
@@ -482,8 +423,6 @@ const Story = () => {
     if (!stories || !Array.isArray(stories)) return
     setActiveUserStories(stories)
     setActiveUserIndex(0)
-
-    console.log("OPEN USER STORIES:", stories)
   }
 
   const closeOverlay = () => setActiveUserStories(null)
@@ -499,12 +438,12 @@ const Story = () => {
     <div className='w-full md:w-[70%] md:ml-40 bg-black/50 border-2 border-gray-600 rounded-3xl pt-3 pb-4 relative'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex gap-4 overflow-x-auto py-2 whitespace-nowrap custom-scrollbar-hidden'>
-          {/* ================== MY STORY ================== */}
           <div className='text-center'>
             {myStories.length > 0 ? (
               <div
                 onClick={() => openUserStory(myStories)}
-                className='relative w-16 h-16 p-0.5 rounded-full bg-linear-to-tr from-orange-400 via-red-500 to-orange-600 cursor-pointer'
+                className='relative w-16 h-16 p-0.5 rounded-full bg-linear-to-tr from-orange-400 via-red-500
+                 to-orange-600 cursor-pointer'
               >
                 <img
                   src={
@@ -526,7 +465,10 @@ const Story = () => {
                     alt='Profile'
                     className='w-full h-full rounded-full object-cover border-2 border-gray-600'
                   />
-                  <div className='absolute -bottom-1 right-0 w-6 h-6 bg-white text-blue-500 rounded-full flex items-center justify-center border-2 border-gray-900 text-xl font-bold'>
+                  <div
+                    className='absolute -bottom-1 right-0 w-6 h-6 bg-white text-blue-500 rounded-full flex
+                   items-center justify-center border-2 border-gray-900 text-xl font-bold'
+                  >
                     +
                   </div>
                 </div>
@@ -552,8 +494,8 @@ const Story = () => {
                 <div
                   className={`relative w-16 h-16 rounded-full p-0.5 ${
                     allViewed
-                      ? "bg-gray-500"
-                      : "bg-linear-to-tr from-orange-400 via-red-500 to-orange-600"
+                      ? 'bg-gray-500'
+                      : 'bg-linear-to-tr from-orange-400 via-red-500 to-orange-600'
                   }`}
                 >
                   <img

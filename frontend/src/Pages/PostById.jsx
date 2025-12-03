@@ -1,12 +1,6 @@
-import React, {
-  useEffect,
-  useState,
-  useContext,
-  useRef,
-  useCallback,
-} from "react"
-import { useParams, useNavigate, Link } from "react-router-dom"
-import { AppContext } from "../Context/context"
+import { useEffect, useState, useContext, useRef, useCallback } from 'react'
+import { useParams, useNavigate, Link } from 'react-router-dom'
+import { AppContext } from '../Context/context'
 import {
   MoreVertical,
   Edit,
@@ -18,7 +12,7 @@ import {
   ChevronLeft,
   AlertCircle,
   Loader,
-} from "lucide-react"
+} from 'lucide-react'
 
 const PostById = () => {
   const { postId } = useParams()
@@ -43,18 +37,18 @@ const PostById = () => {
   const [menuOpen, setMenuOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
-  const [editCaption, setEditCaption] = useState("")
+  const [editCaption, setEditCaption] = useState('')
   const [editMediaFile, setEditMediaFile] = useState(null)
   const [editPreview, setEditPreview] = useState(null)
   const [editLoading, setEditLoading] = useState(false)
-  const [message, setMessage] = useState("")
-  const [messageType, setMessageType] = useState("error")
+  const [message, setMessage] = useState('')
+  const [messageType, setMessageType] = useState('error')
 
   const menuRef = useRef(null)
   const editFileRef = useRef(null)
 
   const handleSave = async () => {
-    if (!user) return navigate("/login")
+    if (!user) return navigate('/login')
     if (saving) return
 
     const willBookmark = !isBookmarked
@@ -71,17 +65,17 @@ const PostById = () => {
 
         setUser(prev => ({ ...prev, savedPosts: updatedSavedPosts }))
 
-        setMessage(res.data?.message || (willBookmark ? "Saved" : "Removed"))
-        setMessageType("success")
+        setMessage(res.data?.message || (willBookmark ? 'Saved' : 'Removed'))
+        setMessageType('success')
       } else {
         setIsBookmarked(!willBookmark)
-        setMessage(res?.message || "Failed to save")
-        setMessageType("error")
+        setMessage(res?.message || 'Failed to save')
+        setMessageType('error')
       }
     } catch (err) {
       setIsBookmarked(!willBookmark)
-      setMessage("Error saving post")
-      setMessageType("error")
+      setMessage(err.message || 'Error saving post')
+      setMessageType('error')
     } finally {
       setSaving(false)
     }
@@ -93,8 +87,8 @@ const PostById = () => {
         setMenuOpen(false)
       }
     }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
   useEffect(() => {
@@ -108,56 +102,67 @@ const PostById = () => {
         if (result?.success) {
           const fetchedPost = result.data
           setPost(fetchedPost)
-          setEditCaption(fetchedPost?.caption || "")
+          setEditCaption(fetchedPost?.caption || '')
           const likes = fetchedPost?.likes || []
           const currentUserLiked = likes.some(
             l => String(l?._id || l) === String(user?._id || user?.id)
           )
-        setIsLiked(Boolean(likedByUser))
-        setLikesCount(Array.isArray(likes) ? likes.length : 0)
-      } else {
-        setMessage(result?.message || 'Failed to load post')
+          setIsLiked(currentUserLiked)
+          setLikesCount(likes.length)
+        } else {
+          setMessage(result?.message || 'Failed to load post')
+          setMessageType('error')
+        }
+      } catch (err) {
+        if (mounted) {
+          setMessage(err.message || 'Error loading post')
+          setMessageType('error')
+        }
+      } finally {
+        if (mounted) setLoading(false)
       }
     }
 
     loadPost()
     return () => (mounted = false)
-  }, [postId, getPostById, user?.id, user])
+  }, [postId, getPostById, user?._id, user?.id])
 
-  const handleMediaDblClick = async () => {
+  const handleMediaDblClick = useCallback(() => {
     if (!isLiked) {
       setIsLiked(true)
       setShowDblClickHeart(true)
       setTimeout(() => setShowDblClickHeart(false), 800)
-      await handleLikeToggle(true)
+      handleLikeToggle(true)
     }
-  }
+  }, [isLiked])
 
-  const handleLikeToggle = async (forceLike = false) => {
-    if (!user) return navigate('/login')
+  const handleLikeToggle = useCallback(
+    async (forceLike = false) => {
+      if (!user) return navigate('/login')
+      const actionIsLike = forceLike || !isLiked
+      const prevLiked = isLiked
+      const prevCount = likesCount
+      setIsLiked(actionIsLike)
+      setLikesCount(v => (actionIsLike ? v + 1 : Math.max(0, v - 1)))
 
-    const actionIsLike = forceLike || !isLiked
-
-    const prevLiked = isLiked
-    const prevCount = likesCount
-    setIsLiked(actionIsLike)
-    setLikesCount(v => (actionIsLike ? v + 1 : Math.max(0, v - 1)))
-
-    try {
-      const res = await addLikeAndRemoveLike(postId)
-      if (res?.success) {
-        setIsLiked(Boolean(res.data?.liked))
-        if (typeof res.data?.likesCount === 'number') {
-          setLikesCount(res.data.likesCount)
+      try {
+        const res = await addLikeAndRemoveLike(postId)
+        if (res?.success) {
+          setIsLiked(Boolean(res.data?.liked))
+          if (typeof res.data?.likesCount === 'number') {
+            setLikesCount(res.data.likesCount)
+          }
         } else {
-          const cnt = await getCountOfLikes?.(postId)
-          if (cnt?.success) setLikesCount(cnt.data?.likesCount || 0)
+          setIsLiked(prevLiked)
+          setLikesCount(prevCount)
+          setMessage(res?.message || 'Failed to update like')
+          setMessageType('error')
         }
-      } else {
+      } catch (err) {
         setIsLiked(prevLiked)
         setLikesCount(prevCount)
-        setMessage("Error updating like")
-        setMessageType("error")
+        setMessage(err.message || 'Error updating like')
+        setMessageType('error')
       }
     },
     [isLiked, likesCount, user, postId, addLikeAndRemoveLike, navigate]
@@ -169,16 +174,16 @@ const PostById = () => {
     try {
       const res = await deletePost(post._id)
       if (res?.success) {
-        setMessage("Post deleted successfully")
-        setMessageType("success")
-        setTimeout(() => navigate("/profile"), 1500)
+        setMessage('Post deleted successfully')
+        setMessageType('success')
+        setTimeout(() => navigate('/profile'), 1500)
       } else {
-        setMessage(res?.message || "Failed to delete post")
-        setMessageType("error")
+        setMessage(res?.message || 'Failed to delete post')
+        setMessageType('error')
       }
     } catch (err) {
-      setMessage(err.message || "Error deleting post")
-      setMessageType("error")
+      setMessage(err.message || 'Error deleting post')
+      setMessageType('error')
     } finally {
       setEditLoading(false)
       setShowDeleteConfirm(false)
@@ -204,42 +209,37 @@ const PostById = () => {
   const openEdit = useCallback(() => {
     setShowEditModal(true)
     setMenuOpen(false)
-    setEditCaption(post?.caption || '')
-    setEditMediaFile(null)
-    setEditPreview(null)
-  }
-
-  const submitEdit = async e => {
-    e.preventDefault()
-    if (!post) return
-    setEditLoading(true)
     setMessage('')
-    try {
-      const form = new FormData()
-      form.append('contentType', post.contentType || 'image')
-      if (editMediaFile) form.append('media', editMediaFile)
-      form.append('caption', editCaption || '')
+  }, [])
 
-      const res = await editPost(post._id, form)
-      if (res?.success) {
-        const updated = res.data?.story || res.data?.post || res.data
-        if (updated && updated._id) {
-          setPost(prev => ({ ...prev, ...updated }))
-        } else {
-          setPost(prev => ({ ...prev, caption: editCaption }))
-          if (editPreview) {
-            setPost(prev => ({
-              ...prev,
-              media: { ...(prev.media || {}), url: editPreview },
-            }))
+  const submitEdit = useCallback(
+    async e => {
+      e.preventDefault()
+      if (!post?._id) return
+      setEditLoading(true)
+      setMessage('')
+      try {
+        const form = new FormData()
+        form.append('contentType', post.contentType || 'image')
+        if (editMediaFile) form.append('media', editMediaFile)
+        form.append('caption', editCaption || '')
+
+        const res = await editPost(post._id, form)
+        if (res?.success) {
+          const updated = res.data?.post || res.data
+          if (updated?._id) {
+            setPost(prev => ({ ...prev, ...updated }))
+            setMessage('Post updated successfully')
+            setMessageType('success')
+            setShowEditModal(false)
           }
         } else {
-          setMessage(res?.message || "Failed to edit post")
-          setMessageType("error")
+          setMessage(res?.message || 'Failed to edit post')
+          setMessageType('error')
         }
       } catch (err) {
-        setMessage(err.message || "Error editing post")
-        setMessageType("error")
+        setMessage(err.message || 'Error editing post')
+        setMessageType('error')
       } finally {
         setEditLoading(false)
       }
@@ -256,13 +256,13 @@ const PostById = () => {
 
   const dateString = post?.createdAt
     ? new Date(post.createdAt).toLocaleString(undefined, {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
       })
-    : ""
+    : ''
 
   const userProfileUrl =
     post?.user?.profilePicture?.url ||
@@ -300,23 +300,11 @@ const PostById = () => {
     )
   }
 
-  const isOwner = String(post.user?._id) === String(user?.id)
-
-  const dateString = post.createdAt
-    ? new Date(post.createdAt).toLocaleString(undefined, {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
-    : ''
-
   return (
-    <div className='min-h-screen w-full bg-black text-white flex justify-center'>
-      <div className='w-full md:max-w-xl lg:max-w-2xl mx-auto min-h-screen border-x border-gray-800/50'>
-        <div className='flex items-center justify-between p-4 border-b border-gray-800 bg-gray-950 sticky top-0 z-30'>
-          <div className='flex items-center'>
+    <div className='w-full bg-black text-white flex justify-center'>
+      <div className='w-full md:max-w-2xl mx-auto min-h-screen border-x border-gray-800/50'>
+        <div className='flex items-center justify-between p-4 border-b border-gray-800 bg-gray-900 sticky top-0 z-30'>
+          <div className='flex items-center gap-3 flex-1'>
             <button
               onClick={() => navigate(-1)}
               className='p-1 rounded-full hover:bg-white/10 transition md:hidden'
@@ -325,7 +313,7 @@ const PostById = () => {
               <ChevronLeft className='w-6 h-6' />
             </button>
             <Link
-              to={isOwner ? "/profile" : `/users/${post.user?._id}`}
+              to={isOwner ? '/profile' : `/users/${post.user?._id}`}
               className='flex items-center gap-3 hover:opacity-80 transition'
             >
               <img
@@ -338,7 +326,7 @@ const PostById = () => {
                   {post.user?.username}
                 </div>
                 <div className='text-xs text-gray-400'>
-                  {post.user?.fullname || "User"}
+                  {post.user?.fullName || 'User'}
                 </div>
               </div>
             </Link>
@@ -380,7 +368,6 @@ const PostById = () => {
         <div
           className='relative w-full aspect-square bg-gray-900 flex items-center justify-center overflow-hidden'
           onDoubleClick={handleMediaDblClick}
-          style={{ maxHeight: '85vh' }}
         >
           {showDblClickHeart && (
             <div className='absolute inset-0 flex items-center justify-center pointer-events-none z-20 bg-black/20'>
@@ -392,7 +379,7 @@ const PostById = () => {
           )}
 
           {post.media?.url ? (
-            post.contentType === "video" ? (
+            post.contentType === 'video' ? (
               <video
                 src={post.media.url}
                 controls
@@ -410,47 +397,28 @@ const PostById = () => {
             <div className='text-gray-500'>No media available</div>
           )}
         </div>
-
-        <div className='flex items-center justify-between p-3 border-b border-gray-800/50'>
+        <div className='flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-gray-900'>
           <div className='flex items-center gap-4'>
-            <div className='flex items-center gap-1'>
-              <button
-                onClick={() => handleLikeToggle()}
-                className='p-1 rounded-full focus:outline-none transition'
-                aria-label={isLiked ? 'Unlike Post' : 'Like Post'}
-              >
-                <Heart
-                  className={`w-6 h-6 transition-colors duration-200 ${
-                    isLiked
-                      ? 'text-red-500 fill-red-500'
-                      : 'text-gray-400 hover:text-white'
-                  }`}
-                  fill={isLiked ? 'currentColor' : 'none'}
-                />
-              </button>
-              <span className='text-sm font-semibold text-gray-300'>
-                {likesCount}
-              </span>
-            </div>
-
-            <div className='flex items-center gap-1'>
-              <Link
-                to={`/post/${post._id}/add-comment`}
-                className='p-2 hover:bg-white/10 rounded-full transition'
-                aria-label='Comment'
-              >
-                <MessageCircle className='w-6 h-6 text-gray-300' />
-              </Link>
-            </button>
-
             <button
+              onClick={() => handleLikeToggle()}
               className='p-2 hover:bg-white/10 rounded-full transition'
-              aria-label='Send'
+              aria-label='Like'
             >
-              <Send className='w-6 h-6 text-gray-300' />
+              <Heart
+                className={`w-6 h-6 transition-all ${
+                  isLiked ? 'text-orange-500' : 'text-gray-300'
+                }`}
+                fill={isLiked ? 'currentColor' : 'none'}
+              />
             </button>
+            <Link
+              to={`/post/${post._id}/add-comment`}
+              className='p-2 hover:bg-white/10 rounded-full transition'
+              aria-label='Comment'
+            >
+              <MessageCircle className='w-6 h-6 text-gray-300' />
+            </Link>
           </div>
-
           <button
             onClick={handleSave}
             className='p-2 hover:bg-white/10 rounded-full transition'
@@ -461,116 +429,50 @@ const PostById = () => {
               strokeWidth={2}
               className={`w-6 h-6 transition ${
                 isBookmarked
-                  ? "text-orange-500 fill-orange-500"
-                  : "text-gray-300"
+                  ? 'text-orange-500 fill-orange-500'
+                  : 'text-gray-300'
               }`}
             />
           </button>
         </div>
 
-        <div className='p-4'>
-          {post.caption && (
-            <div className='mb-3 text-sm leading-snug'>
-              <Link
-                to={`/profile/${post.user?.username || post.user?._id}`}
-                className='font-bold mr-2 hover:text-gray-300 transition'
-              >
-                {post.user?.username}
-              </Link>
-              <span className='text-gray-200 whitespace-pre-wrap'>
-                {post.caption}
-              </span>
-            </div>
+        <div className='px-4 py-2'>
+          <p className='font-bold text-sm mb-1'>{likesCount} likes</p>
+          <p className='text-sm'>
+            <span className='font-bold'>{post.user?.username}</span>{' '}
+            {post.caption || ''}
+          </p>
+          {dateString && (
+            <p className='text-xs text-gray-400 mt-1'>{dateString}</p>
           )}
+        </div>
 
-          {post.comments?.length > 0 && (
-            <>
-              <Link
-                to={`/post/${post._id}/comments`}
-                className='text-sm text-gray-400 hover:text-gray-300 transition block mb-3'
-              >
-                View all {post.comments.length} comments
-              </Link>
-              <div className='space-y-1'>
-                {(post.comments || []).slice(0, 2).map((c, i) => (
-                  <div key={i} className='text-sm flex leading-snug'>
-                    <span className='font-semibold mr-2'>
-                      {c.user?.username || 'Anonymous'}
-                    </span>
-                    <span className='text-gray-300'>{c.text}</span>
-                  </div>
-                ))}
+        {showDeleteConfirm && (
+          <div className='fixed inset-0 flex items-center justify-center z-50 bg-black/50'>
+            <div className='bg-gray-900 rounded-lg p-6 w-80 border border-gray-700'>
+              <h2 className='text-lg font-bold mb-4'>Confirm Delete</h2>
+              <p className='text-sm text-gray-300 mb-4'>
+                Are you sure you want to delete this post? This action cannot be
+                undone.
+              </p>
+              <div className='flex justify-end gap-3'>
+                <button
+                  onClick={() => setShowDeleteConfirm(false)}
+                  className='px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg transition'
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={editLoading}
+                  className='px-3 py-2 bg-red-500 hover:bg-red-600 rounded-lg transition disabled:opacity-50'
+                >
+                  {editLoading ? 'Deleting...' : 'Delete'}
+                </button>
               </div>
-            </>
-          )}
-
-          <div className='pt-3 text-xs text-gray-500 uppercase tracking-wider'>
-            {dateString}
-          </div>
-        </div>
-
-      {showDeleteConfirm && (
-        <div className='fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 backdrop-blur-sm'>
-          <div className='w-full max-w-sm bg-gray-900 rounded-xl border border-gray-800 p-6 shadow-2xl'>
-            <h3 className='text-xl font-bold mb-3 text-center text-red-400'>
-              Confirm Delete
-            </h3>
-            <p className='text-sm text-gray-300 mb-6 text-center'>
-              Are you absolutely sure you want to delete this post? This action
-              cannot be undone.
-            </p>
-            <div className='flex gap-3'>
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className='flex-1 px-4 py-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition'
-              >
-                Cancel
-              </button>
-              <button
-                onClick={confirmDelete}
-                className='flex-1 px-4 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition
-                 disabled:opacity-50'
-                disabled={editLoading}
-              >
-                {editLoading ? 'Deleting...' : 'Delete Permanently'}
-              </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {showEditModal && (
-        <div className='fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 overflow-y-auto backdrop-blur-sm'>
-          <div className='w-full max-w-lg bg-gray-900 rounded-xl border border-gray-800 p-6 my-8 shadow-2xl'>
-            <h3 className='text-2xl font-bold mb-6 text-orange-500'>
-              Edit Post
-            </h3>
-
-            <form onSubmit={submitEdit} className='space-y-6'>
-              <div>
-                <label className='text-sm text-gray-300 block mb-2 font-semibold'>
-                  Media Preview
-                </label>
-                <div className='w-full h-72 bg-black rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center'>
-                  {editPreview || post.media?.url ? (
-                    post.contentType === 'video' ? (
-                      <video
-                        src={editPreview || post.media.url}
-                        controls
-                        className='w-full h-full object-contain'
-                        key={editPreview || post.media.url}
-                      />
-                    ) : (
-                      <img
-                        src={editPreview || post.media.url}
-                        alt='preview'
-                        className='w-full h-full object-cover'
-                      />
-                    )
-                  ) : (
-                    <div className='text-gray-500'>No media to preview</div>
-                  )}
-                </div>
+        )}
 
         {showEditModal && (
           <div className='fixed inset-0 flex items-center justify-center z-50 bg-black/50'>
@@ -595,7 +497,7 @@ const PostById = () => {
                   />
                   {editPreview && (
                     <div className='w-16 h-16 border border-gray-700 rounded-lg overflow-hidden'>
-                      {editMediaFile?.type.startsWith("video") ? (
+                      {editMediaFile?.type.startsWith('video') ? (
                         <video
                           src={editPreview}
                           className='w-full h-full object-cover'
@@ -617,9 +519,9 @@ const PostById = () => {
                 {message && (
                   <p
                     className={`text-sm ${
-                      messageType === "error"
-                        ? "text-red-400"
-                        : "text-green-400"
+                      messageType === 'error'
+                        ? 'text-red-400'
+                        : 'text-green-400'
                     }`}
                   >
                     {message}
@@ -639,52 +541,23 @@ const PostById = () => {
                     disabled={editLoading}
                     className='px-3 py-2 bg-orange-500 hover:bg-orange-600 rounded-lg transition disabled:opacity-50'
                   >
-                    {editLoading ? "Saving..." : "Save"}
+                    {editLoading ? 'Saving...' : 'Save'}
                   </button>
                 </div>
-              </div>
+              </form>
+            </div>
+          </div>
+        )}
 
-              <div>
-                <label
-                  htmlFor='edit-caption'
-                  className='text-sm text-gray-300 block mb-2 font-semibold'
-                >
-                  Caption
-                </label>
-                <textarea
-                  id='edit-caption'
-                  value={editCaption}
-                  onChange={e => setEditCaption(e.target.value)}
-                  placeholder="What's on your mind?"
-                  className='w-full p-3 bg-gray-800 rounded-lg border border-gray-700 resize-none text-white focus:ring-1
-                   focus:ring-orange-500 focus:border-orange-500 transition'
-                  rows={4}
-                />
-              </div>
-              <div className='flex justify-end gap-3 pt-4'>
-                <button
-                  type='button'
-                  onClick={() => setShowEditModal(false)}
-                  className='px-6 py-3 bg-gray-700/50 rounded-lg hover:bg-gray-700 transition font-medium'
-                  disabled={editLoading}
-                >
-                  Cancel
-                </button>
-                <button
-                  type='submit'
-                  className='px-6 py-3 bg-orange-500 text-black font-semibold rounded-lg hover:bg-orange-600 transition
-                   disabled:opacity-50'
-                  disabled={editLoading}
-                >
-                  {editLoading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-              {message && (
-                <div className='text-sm text-red-400 mt-4 text-center'>
-                  {message}
-                </div>
-              )}
-            </form>
+        {message && !showEditModal && !showDeleteConfirm && (
+          <div className='fixed bottom-4 left-1/2 -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg border border-gray-700 text-sm'>
+            <p
+              className={`${
+                messageType === 'error' ? 'text-red-400' : 'text-green-400'
+              }`}
+            >
+              {message}
+            </p>
           </div>
         )}
       </div>

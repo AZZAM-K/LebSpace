@@ -1,13 +1,13 @@
-import Story from "../models/Story.js"
-import { cloudinary } from "../config/uploader.js"
-import User from "../models/User.js"
+import Story from '../models/Story.js'
+import { cloudinary } from '../config/uploader.js'
+import User from '../models/User.js'
 
 const uploadToCloudinary = (fileBuffer, contentType) => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        resource_type: contentType === "video" ? "video" : "image",
-        folder: "stories",
+        resource_type: contentType === 'video' ? 'video' : 'image',
+        folder: 'stories',
       },
       (err, result) => {
         if (err) return reject(err)
@@ -22,10 +22,10 @@ const uploadToCloudinary = (fileBuffer, contentType) => {
 export const addStory = async (req, res) => {
   try {
     const userId = req.userId
-    const { contentType, isCloseFriends } = req.body
+    const { contentType } = req.body
 
     if (!req.file) {
-      return res.status(400).json({ message: "No file uploaded!" })
+      return res.status(400).json({ message: 'No file uploaded!' })
     }
 
     const expiresAt = new Date()
@@ -38,23 +38,22 @@ export const addStory = async (req, res) => {
 
     const newStory = new Story({
       user: userId,
-      contentType: contentType || "image",
+      contentType: contentType || 'image',
       media: {
         public_id: cloudinaryResult.public_id,
         url: cloudinaryResult.secure_url,
       },
       expiresAt,
-      isCloseFriends: isCloseFriends || false,
     })
 
     await newStory.save()
 
     return res
       .status(201)
-      .json({ message: "Story added for 24 hours", story: newStory })
+      .json({ message: 'Story added for 24 hours', story: newStory })
   } catch (err) {
     console.error(err)
-    return res.status(500).json({ message: "Server error" })
+    return res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -68,13 +67,13 @@ export const getMyStories = async (req, res) => {
       createdAt: { $gte: twentyFourHoursAgo },
       expiresAt: { $gt: now },
     })
-      .populate("user", "username profilePicture")
+      .populate('user', 'username profilePicture')
       .sort({ createdAt: -1 })
 
     res.status(200).json({ success: true, stories })
   } catch (err) {
-    console.error("Error fetching user stories:", err)
-    res.status(500).json({ success: false, message: "Server error" })
+    console.error('Error fetching user stories:', err)
+    res.status(500).json({ success: false, message: 'Server error' })
   }
 }
 
@@ -84,22 +83,22 @@ export const deleteStory = async (req, res) => {
     const userId = req.userId
     const story = await Story.findById(storyId)
 
-    if (!story) return res.status(404).json({ message: "Story not found" })
+    if (!story) return res.status(404).json({ message: 'Story not found' })
 
     if (String(story.user) !== String(userId))
-      return res.status(403).json({ message: "Not authorized" })
+      return res.status(403).json({ message: 'Not authorized' })
 
     if (story.media.public_id) {
-      const type = story.contentType === "video" ? "video" : "image"
+      const type = story.contentType === 'video' ? 'video' : 'image'
       await cloudinary.uploader.destroy(story.media.public_id, {
         resource_type: type,
       })
     }
     await Story.findByIdAndDelete(storyId)
-    res.status(200).json({ message: "Story deleted successfully" })
+    res.status(200).json({ message: 'Story deleted successfully' })
   } catch (err) {
-    console.error("Error deleting story:", err)
-    res.status(500).json({ message: "Server error" })
+    console.error('Error deleting story:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -108,28 +107,23 @@ export const getFollowingStories = async (req, res) => {
     const userId = req.userId
 
     if (!userId) {
-      return res.status(401).json({ message: "Missing userId in token" })
+      return res.status(401).json({ message: 'Missing userId in token' })
     }
 
-    const user = await User.findById(userId).select("following")
+    const user = await User.findById(userId).select('following')
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" })
+      return res.status(404).json({ message: 'User not found' })
     }
 
     const followingIds = user.following || []
 
-    // DEBUG 👇👇👇
-    console.log("==== DEBUG FOLLOWING STORIES ====")
-    console.log("Logged User:", userId)
-    console.log("Following IDs:", followingIds)
-
     if (followingIds.length === 0) {
-      console.log("User is not following anyone.")
+      console.log('User is not following anyone.')
       return res.status(200).json({
         success: true,
         stories: [],
-        message: "No following users",
+        message: 'No following users',
       })
     }
 
@@ -137,21 +131,18 @@ export const getFollowingStories = async (req, res) => {
       user: { $in: followingIds },
       expiresAt: { $gt: new Date() },
     })
-      .populate("user", "username fullName profilePicture")
+      .populate('user', 'username fullName profilePicture')
       .sort({ createdAt: -1 })
-
-    // DEBUG 👇👇👇
-    console.log("Found Stories:", stories)
 
     return res.status(200).json({
       success: true,
       stories,
     })
   } catch (error) {
-    console.error("Error fetching following stories:", error)
+    console.error('Error fetching following stories:', error)
     return res
       .status(500)
-      .json({ message: "Server error fetching following stories" })
+      .json({ message: 'Server error fetching following stories' })
   }
 }
 
@@ -159,11 +150,11 @@ export const getUserViewedStories = async (req, res) => {
   try {
     const { storyId } = req.params
     const story = await Story.findById(storyId).populate(
-      "viewers",
-      "username profilePicture img _id"
+      'viewers',
+      'username profilePicture img _id'
     )
 
-    if (!story) return res.status(404).json({ message: "Story not found" })
+    if (!story) return res.status(404).json({ message: 'Story not found' })
 
     res.status(200).json({
       success: true,
@@ -171,8 +162,8 @@ export const getUserViewedStories = async (req, res) => {
       count: story.viewers.length,
     })
   } catch (err) {
-    console.error("Error fetching story viewers:", err)
-    res.status(500).json({ message: "Server error" })
+    console.error('Error fetching story viewers:', err)
+    res.status(500).json({ message: 'Server error' })
   }
 }
 
@@ -182,9 +173,8 @@ export const addViewer = async (req, res) => {
     const userId = req.userId
 
     const story = await Story.findById(storyId)
-    if (!story) return res.status(404).json({ message: "Story not found" })
+    if (!story) return res.status(404).json({ message: 'Story not found' })
 
-    // تحقق إذا المستخدم شاف القصة مسبقاً
     const alreadyViewed = story.viewers.some(
       v => v.toString() === userId.toString()
     )
@@ -195,10 +185,9 @@ export const addViewer = async (req, res) => {
       await story.save()
     }
 
-    // احصل على قائمة المشاهدين مع معلوماتهم الكاملة
     const populatedStory = await Story.findById(storyId).populate(
-      "viewers",
-      "username profilePicture img _id"
+      'viewers',
+      'username profilePicture _id'
     )
 
     res.status(200).json({
@@ -208,7 +197,6 @@ export const addViewer = async (req, res) => {
     })
   } catch (error) {
     console.error(error)
-    res.status(500).json({ message: "Server error adding viewer" })
+    res.status(500).json({ message: 'Server error adding viewer' })
   }
 }
-// ...existing code...

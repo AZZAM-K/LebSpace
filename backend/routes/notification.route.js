@@ -8,8 +8,10 @@ import { authenticate } from '../middleware/auth.js'
 
 const router = Router()
 
-router.get('/', authenticate, getNotifications)
-router.delete('/:id', authenticate, deleteNotification)
-router.delete('/', authenticate, clearNotifications)
+router.use(authenticate)
+
+router.get('/', getNotifications)
+router.delete('/', clearNotifications)
+router.delete('/:id', deleteNotification)
 
 export default router

@@ -1,4 +1,3 @@
-// routes/storyRoutes.js
 import { Router } from 'express'
 import {
   addStory,
@@ -7,18 +6,20 @@ import {
   getFollowingStories,
   getUserViewedStories,
   addViewer,
-} from "../controllers/story.controller.js"
-import { upload } from "../config/uploader.js"
-import { authenticate } from "../middleware/auth.js"
+} from '../controllers/story.controller.js'
+import { upload } from '../config/uploader.js'
+import { authenticate } from '../middleware/auth.js'
 
-const router = express.Router()
+const router = Router()
 
-router.post("/add-story", authenticate, upload.single("media"), addStory)
-router.get("/my-story", authenticate, getMyStories)
-router.delete("/delete-story/:storyId", authenticate, deleteStory)
+router.use(authenticate)
 
-router.get("/following-stories", authenticate, getFollowingStories)
-router.get("/get-viewed-stories/:storyId", authenticate, getUserViewedStories)
-router.post("/add-viewer/:storyId", authenticate, addViewer)
+router.post('/add-story', upload.single('media'), addStory)
+router.get('/my-story', getMyStories)
+router.delete('/delete-story/:storyId', deleteStory)
+
+router.get('/following-stories', getFollowingStories)
+router.get('/get-viewed-stories/:storyId', getUserViewedStories)
+router.post('/add-viewer/:storyId', addViewer)
 
 export default router
