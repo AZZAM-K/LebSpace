@@ -64,7 +64,7 @@ const Notifications = () => {
         return
       }
       setNotifications(prev =>
-        prev.filter(n => n.sender._id !== id && n.type === 'request')
+        prev.filter(n => n.sender._id !== id && n.type !== 'request')
       )
     } catch (error) {
       setError(error.message)
@@ -81,7 +81,7 @@ const Notifications = () => {
         return
       }
       setNotifications(prev =>
-        prev.filter(n => n.sender._id !== id && n.type === 'request')
+        prev.filter(n => n.sender._id !== id && n.type !== 'request')
       )
     } catch (error) {
       setError(error.message)
