@@ -29,6 +29,10 @@ app.use(
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
+app.get('/health', (req, res) => {
+  res.status(200).send('OK')
+})
+
 app.use('/api/users', userRouter)
 app.use('/api/post', postRouter)
 app.use('/api/story', storyRouter)
