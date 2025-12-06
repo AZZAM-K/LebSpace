@@ -33,7 +33,6 @@ const Profile = () => {
 
       try {
         const result = await getSavedPostsForUser(userId)
-        console.log(result)
 
         if (result.success) {
           setSavedPosts(result.data)
