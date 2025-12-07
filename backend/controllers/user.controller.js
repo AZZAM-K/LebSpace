@@ -189,7 +189,7 @@ export const getUserById = async (req, res) => {
     const { id } = req.params
     const user = await User.findById(id)
       .select(
-        '-password -stories -blockedUsers -gender -isOnline -lastSeen -savedPosts -dateOfBirth -email'
+        '-password -stories -gender -isOnline -lastSeen -savedPosts -dateOfBirth -email'
       )
       .populate({
         path: 'posts',
