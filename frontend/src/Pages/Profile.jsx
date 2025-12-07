@@ -29,7 +29,6 @@ const Profile = () => {
 
     const loadSavedPosts = async userId => {
       if (!userId) return
-      console.log(userId)
 
       try {
         const result = await getSavedPostsForUser(userId)
@@ -276,7 +275,7 @@ const Profile = () => {
           {activeTab === 'posts' && (
             <>
               {sortedPosts.length > 0 ? (
-                <div className='grid grid-cols-3 gap-1 md:gap-6 animate-fade-in'>
+                <div className='grid grid-cols-3 gap-1 md:gap-6'>
                   {sortedPosts.map(post => (
                     <div
                       key={post._id}
@@ -303,7 +302,7 @@ const Profile = () => {
                         </>
                       ) : (
                         <img
-                          src={post.media?.url || '/fallback-image.png'}
+                          src={post.media?.url}
                           alt='Post'
                           className='w-full h-full object-cover transition duration-300 group-hover:scale-105'
                         />
@@ -350,7 +349,7 @@ const Profile = () => {
           {activeTab === 'saved' && (
             <>
               {savedPosts.length > 0 ? (
-                <div className='grid grid-cols-3 gap-1 md:gap-6 animate-fade-in'>
+                <div className='grid grid-cols-3 gap-1 md:gap-6'>
                   {savedPosts.map(post => (
                     <div
                       key={post._id}

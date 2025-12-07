@@ -26,15 +26,13 @@ const SignUp = () => {
 
     try {
       const res = await signup(formData)
-      console.log('Signup response:', res)
       if (res.success) {
         navigate('/')
       } else {
         setError(res.message || 'Something went wrong')
       }
     } catch (err) {
-      console.log(err)
-      setError('Server error')
+      setError(err.message || 'Server error')
     }
   }
 

@@ -1,16 +1,7 @@
 import { useState, useContext, useEffect, useEffectEvent } from 'react'
 import { AppContext } from '../Context/context'
 import { Link, useParams, useNavigate } from 'react-router'
-import {
-  Grid,
-  Tag,
-  Heart,
-  MessageCircle,
-  Loader2,
-  Ban,
-  Bookmark,
-  Lock,
-} from 'lucide-react'
+import { Grid, Heart, MessageCircle, Loader2, Ban, Lock } from 'lucide-react'
 
 const User = () => {
   const { id } = useParams()
@@ -330,11 +321,31 @@ const User = () => {
                       className='relative group aspect-square cursor-pointer bg-gray-900 overflow-hidden'
                       onClick={() => navigate(`/post/${post._id}`)}
                     >
-                      <img
-                        src={post.media?.url || '/fallback-image.png'}
-                        alt='Post'
-                        className='w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:opacity-50'
-                      />
+                      {post.contentType === 'video' ? (
+                        <>
+                          <video
+                            src={post.media?.url}
+                            className='w-full h-full object-cover'
+                            autoPlay
+                            muted
+                            loop
+                            playsInline
+                          />
+
+                          <div
+                            className='absolute top-2 right-2 bg-black/70 px-2 py-1 rounded text-xs text-white
+                           opacity-0 group-hover:opacity-100 transition'
+                          >
+                            Video
+                          </div>
+                        </>
+                      ) : (
+                        <img
+                          src={post.media?.url}
+                          alt='Post'
+                          className='w-full h-full object-cover transition duration-500 group-hover:scale-110 group-hover:opacity-50'
+                        />
+                      )}
                       <div
                         className='absolute inset-0 hidden group-hover:flex items-center justify-center gap-6 bg-black/30
                        text-white font-bold'

@@ -91,6 +91,38 @@ const PostById = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
+  const handleLikeToggle = useCallback(
+    async (forceLike = false) => {
+      if (!user) return navigate('/login')
+      const actionIsLike = forceLike || !isLiked
+      const prevLiked = isLiked
+      const prevCount = likesCount
+      setIsLiked(actionIsLike)
+      setLikesCount(v => (actionIsLike ? v + 1 : Math.max(0, v - 1)))
+
+      try {
+        const res = await addLikeAndRemoveLike(postId)
+        if (res?.success) {
+          setIsLiked(Boolean(res.data?.liked))
+          if (typeof res.data?.likesCount === 'number') {
+            setLikesCount(res.data.likesCount)
+          }
+        } else {
+          setIsLiked(prevLiked)
+          setLikesCount(prevCount)
+          setMessage(res?.message || 'Failed to update like')
+          setMessageType('error')
+        }
+      } catch (err) {
+        setIsLiked(prevLiked)
+        setLikesCount(prevCount)
+        setMessage(err.message || 'Error updating like')
+        setMessageType('error')
+      }
+    },
+    [isLiked, likesCount, user, postId, addLikeAndRemoveLike, navigate]
+  )
+
   useEffect(() => {
     let mounted = true
     const loadPost = async () => {
@@ -134,39 +166,7 @@ const PostById = () => {
       setTimeout(() => setShowDblClickHeart(false), 800)
       handleLikeToggle(true)
     }
-  }, [isLiked])
-
-  const handleLikeToggle = useCallback(
-    async (forceLike = false) => {
-      if (!user) return navigate('/login')
-      const actionIsLike = forceLike || !isLiked
-      const prevLiked = isLiked
-      const prevCount = likesCount
-      setIsLiked(actionIsLike)
-      setLikesCount(v => (actionIsLike ? v + 1 : Math.max(0, v - 1)))
-
-      try {
-        const res = await addLikeAndRemoveLike(postId)
-        if (res?.success) {
-          setIsLiked(Boolean(res.data?.liked))
-          if (typeof res.data?.likesCount === 'number') {
-            setLikesCount(res.data.likesCount)
-          }
-        } else {
-          setIsLiked(prevLiked)
-          setLikesCount(prevCount)
-          setMessage(res?.message || 'Failed to update like')
-          setMessageType('error')
-        }
-      } catch (err) {
-        setIsLiked(prevLiked)
-        setLikesCount(prevCount)
-        setMessage(err.message || 'Error updating like')
-        setMessageType('error')
-      }
-    },
-    [isLiked, likesCount, user, postId, addLikeAndRemoveLike, navigate]
-  )
+  }, [handleLikeToggle, isLiked])
 
   const confirmDelete = useCallback(async () => {
     if (!post?._id) return
@@ -343,7 +343,10 @@ const PostById = () => {
               </button>
 
               {menuOpen && (
-                <div className='absolute right-0 top-10 w-44 bg-gray-900 border border-gray-700 rounded-lg shadow-xl overflow-hidden z-40'>
+                <div
+                  className='absolute right-0 top-10 w-44 bg-gray-900 border border-gray-700
+                 rounded-lg shadow-xl overflow-hidden z-40'
+                >
                   <button
                     onClick={openEdit}
                     className='w-full text-left px-4 py-3 text-sm hover:bg-white/10 flex items-center gap-2 transition'
@@ -494,6 +497,7 @@ const PostById = () => {
                     onChange={handleEditFileChange}
                     accept='image/*,video/*'
                     className='text-sm text-gray-400'
+                    required
                   />
                   {editPreview && (
                     <div className='w-16 h-16 border border-gray-700 rounded-lg overflow-hidden'>

@@ -340,7 +340,7 @@ const Settings = () => {
             </button>
 
             {isBlockedListOpen && (
-              <div className='px-6 pb-6 border-t border-gray-800 animate-in slide-in-from-top-2'>
+              <div className='px-6 pb-6 border-t border-gray-800 animate-in'>
                 {blockedUsers.length > 0 ? (
                   <div className='divide-y divide-gray-800'>
                     {blockedUsers.map(user => (

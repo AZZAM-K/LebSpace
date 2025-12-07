@@ -76,12 +76,13 @@ export const login = async (req, res) => {
 export const getMyProfile = async (req, res) => {
   try {
     const user = await User.findById(req.userId)
-      .select('-password')
+      .select(
+        '-password -stories -blockedUsers -gender -isOnline -lastSeen -savedPosts -dateOfBirth -email'
+      )
       .populate([
         {
           path: 'posts',
-          select:
-            'media contentType caption likes comments createdAt updatedAt',
+          select: 'media contentType likes comments createdAt updatedAt',
         },
       ])
 
@@ -186,10 +187,14 @@ export const getFollowers = async (req, res) => {
 export const getUserById = async (req, res) => {
   try {
     const { id } = req.params
-    const user = await User.findById(id).select('-password').populate({
-      path: 'posts',
-      select: 'media likes comments createdAt updatedAt',
-    })
+    const user = await User.findById(id)
+      .select(
+        '-password -stories -blockedUsers -gender -isOnline -lastSeen -savedPosts -dateOfBirth -email'
+      )
+      .populate({
+        path: 'posts',
+        select: 'media likes comments createdAt updatedAt contentType',
+      })
     if (!user) {
       return res.status(404).json({ message: 'User not found' })
     }
@@ -510,7 +515,6 @@ export const saveUnsavePost = async (req, res) => {
       })
     }
   } catch (error) {
-    console.log('SAVE/UNSAVE POST ERROR:', error)
     res.status(500).json({ error: 'Server error' })
   }
 }

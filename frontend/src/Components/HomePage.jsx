@@ -38,7 +38,6 @@ const HomePage = () => {
 
       if (result.success) {
         const serverPosts = result.data.posts || []
-        console.log(serverPosts)
         setPosts(serverPosts)
 
         const liked = new Set()
@@ -310,7 +309,7 @@ const HomePage = () => {
                     {post.contentType === 'video' ? (
                       <video
                         src={post.media.url}
-                        className='w-full max-h-100 object-cover'
+                        className='w-full h-full object-cover'
                         onDoubleClick={e => handleLike(post._id, e)}
                         controls={false}
                         preload='metadata'

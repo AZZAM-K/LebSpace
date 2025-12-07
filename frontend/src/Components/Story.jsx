@@ -60,8 +60,6 @@ const StoryOverlay = ({
       currentStory.viewers &&
       currentStory.viewers.length > 0
     ) {
-      console.log('Viewers data:', currentStory.viewers)
-      console.log('First viewer:', currentStory.viewers[0])
       setViewersList(currentStory.viewers)
       setViewersModalOpen(true)
     } else {
@@ -125,7 +123,6 @@ const StoryOverlay = ({
 
   if (!user || !token) return <div style={{ color: 'white' }}>Loading...</div>
   if (!story) return null
-  console.log(viewCount)
   return (
     <div className='fixed inset-0 z-50 flex justify-center items-center bg-black/90'>
       <div className='relative w-full h-full max-w-md'>

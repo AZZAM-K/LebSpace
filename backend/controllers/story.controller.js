@@ -119,7 +119,6 @@ export const getFollowingStories = async (req, res) => {
     const followingIds = user.following || []
 
     if (followingIds.length === 0) {
-      console.log('User is not following anyone.')
       return res.status(200).json({
         success: true,
         stories: [],

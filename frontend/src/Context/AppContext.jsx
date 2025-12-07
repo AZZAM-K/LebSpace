@@ -157,7 +157,6 @@ const AppContextProvider = props => {
 
       localStorage.setItem('token', data.token)
       setToken(data.token)
-      console.log(data.user)
       localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
 
@@ -289,7 +288,6 @@ const AppContextProvider = props => {
     s.on('connect_error', err => console.error('Socket connection error:', err))
 
     const handleConnect = () => {
-      console.log('Connected socket:', s.id)
       setSocket(s)
     }
     s.on('connect', handleConnect)

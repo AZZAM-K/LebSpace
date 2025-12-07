@@ -15,7 +15,6 @@ const Messages = () => {
     if (!res.success) {
       setError(res.message || 'Failed to load chats')
     }
-    console.log(res.data)
     setChats(res.data.chats)
     setLoading(false)
   })

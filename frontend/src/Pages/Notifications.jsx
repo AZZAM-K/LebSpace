@@ -211,7 +211,7 @@ const Notifications = () => {
                       {new Date(n.createdAt).toLocaleString()}
                     </span>
                     {n.type === 'request' && (
-                      <div className='flex gap-3 mt-3 animate-in slide-in-from-top-1 duration-200'>
+                      <div className='flex gap-3 mt-3'>
                         <button
                           onClick={() => handleAccept(n.sender._id)}
                           disabled={
@@ -261,7 +261,7 @@ const Notifications = () => {
               )
             })
           ) : (
-            <div className='flex flex-col items-center justify-center py-20 text-center animate-in fade-in zoom-in duration-300'>
+            <div className='flex flex-col items-center justify-center py-20 text-center'>
               <div className='w-16 h-16 bg-gray-900 rounded-full flex items-center justify-center mb-4'>
                 <Bell className='text-gray-600 w-8 h-8' />
               </div>
