@@ -405,10 +405,11 @@ const Settings = () => {
               </button>
             </div>
           </div>
-          <div className='border-t border-gray-800 pt-4'>
+          <div className='border-t border-gray-800 pt-4 md:hidden mb-3'>
             <button
               onClick={handleLogout}
-              className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
+              className='flex items-center gap-4 px-4 py-3 rounded-xl text-lg font-medium text-gray-400
+               hover:text-red-500 hover:bg-red-500/10 transition-all w-full text-left'
             >
               <LogOut size={22} />
               <span>Log Out</span>

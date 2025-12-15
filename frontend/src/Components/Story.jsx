@@ -7,7 +7,7 @@ import {
 } from 'react'
 import { AppContext } from '../Context/context'
 import { Link } from 'react-router-dom'
-import { X, Eye, ArrowUp } from 'lucide-react'
+import { X, Eye, ChevronUp, Plus } from 'lucide-react'
 
 const StoryOverlay = ({
   stories,
@@ -259,7 +259,7 @@ const StoryOverlay = ({
               onClick={openViewers}
             >
               <div className='flex justify-center mb-1'>
-                <ArrowUp />
+                <ChevronUp />
               </div>
               <div className='text-sm gap-2 font-semibold flex items-center justify-center'>
                 <Eye className='mr-2' />
@@ -432,7 +432,7 @@ const Story = () => {
     )
 
   return (
-    <div className='w-full md:w-[70%] md:ml-40 bg-black/50 border-2 border-gray-600 rounded-3xl pt-3 pb-4 relative'>
+    <div className='mx-auto w-full max-w-full md:max-w-xl bg-black/50 border-2 border-gray-600 rounded-3xl pt-3 pb-4 relative'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex gap-4 overflow-x-auto py-2 whitespace-nowrap custom-scrollbar-hidden'>
           <div className='text-center'>
@@ -464,9 +464,9 @@ const Story = () => {
                   />
                   <div
                     className='absolute -bottom-1 right-0 w-6 h-6 bg-white text-blue-500 rounded-full flex
-                   items-center justify-center border-2 border-gray-900 text-xl font-bold'
+                   items-center justify-center border-2 border-gray-900 text-lg font-bold'
                   >
-                    +
+                    <Plus />
                   </div>
                 </div>
               </Link>

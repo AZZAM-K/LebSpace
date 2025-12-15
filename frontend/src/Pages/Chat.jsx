@@ -252,7 +252,10 @@ const Chat = () => {
           >
             <ChevronLeft size={24} />
           </Link>
-          <div className='relative cursor-pointer'>
+          <Link
+            to={`/users/${otherUser._id}`}
+            className='relative cursor-pointer'
+          >
             <img
               src={
                 otherUser.profilePicture?.url ||
@@ -264,10 +267,10 @@ const Chat = () => {
             {otherUser.isOnline && (
               <span className='absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-[#0a0a0a] rounded-full'></span>
             )}
-          </div>
+          </Link>
           <div className='cursor-pointer'>
             <h2 className='font-bold text-white text-base'>
-              {otherUser.username}
+              <Link to={`/users/${otherUser._id}`}>{otherUser.username}</Link>
             </h2>
             <p className='text-xs text-gray-500'>
               {otherUser.isOnline

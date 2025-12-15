@@ -5,7 +5,7 @@ import HomePage from '../Components/HomePage'
 const Home = () => {
   return (
     <div className='pb-30 md:flex md:justify-center md:gap-6 lg:gap-8 px-2 sm:px-4'>
-      <div className='w-full  px-2 sm:px-4 md:max-w-7xl md:mx-auto'>
+      <div className='w-full px-2 sm:px-4 md:max-w-7xl md:mx-auto'>
         <Story />
 
         <div className='mt-6'>
