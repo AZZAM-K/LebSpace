@@ -138,6 +138,10 @@ const AppContextProvider = props => {
 
       localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
+      localStorage.setItem(
+        'expiryDate',
+        new Date().getTime() + 7 * 24 * 60 * 60 * 1000
+      )
 
       return { success: true }
     } catch (err) {
@@ -159,6 +163,10 @@ const AppContextProvider = props => {
       setToken(data.token)
       localStorage.setItem('user', JSON.stringify(data.user))
       setUser(data.user)
+      localStorage.setItem(
+        'expiryDate',
+        new Date().getTime() + 7 * 24 * 60 * 60 * 1000
+      )
 
       return { success: true }
     } catch (err) {
@@ -218,7 +226,6 @@ const AppContextProvider = props => {
         }
       }
 
-      // return only the users array
       return { success: true, data: json.data }
     } catch (error) {
       console.error('Error fetching users:', error)
@@ -233,6 +240,7 @@ const AppContextProvider = props => {
   const logout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('expiryDate')
     setToken('')
     setUser(null)
   }
@@ -382,9 +390,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/comment/delete/${commentId}`, {
         method: 'DELETE',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
 
       const data = await res.json()
@@ -399,9 +405,7 @@ const AppContextProvider = props => {
   const getFollowers = async id => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}/followers`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
       if (!res.ok) {
@@ -420,9 +424,7 @@ const AppContextProvider = props => {
   const getUserById = async id => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}`, {
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
 
@@ -465,9 +467,7 @@ const AppContextProvider = props => {
     try {
       const res = await fetch(`${backendUrl}/api/users/${id}/follow-request`, {
         method: 'DELETE',
-        headers: {
-          Authorization: token,
-        },
+        headers: { Authorization: token },
       })
       const data = await res.json()
       if (!res.ok) {
@@ -489,9 +489,7 @@ const AppContextProvider = props => {
         `${backendUrl}/api/users/${id}/follow-request/decline`,
         {
           method: 'POST',
-          headers: {
-            Authorization: token,
-          },
+          headers: { Authorization: token },
         }
       )
       const data = await res.json()
@@ -514,9 +512,7 @@ const AppContextProvider = props => {
         `${backendUrl}/api/users/${id}/follow-request/accept`,
         {
           method: 'POST',
-          headers: {
-            Authorization: token,
-          },
+          headers: { Authorization: token },
         }
       )
       const data = await res.json()
@@ -746,6 +742,7 @@ const AppContextProvider = props => {
 
       localStorage.removeItem('token')
       localStorage.removeItem('user')
+      localStorage.removeItem('expiryDate')
       setToken('')
       setUser(null)
 

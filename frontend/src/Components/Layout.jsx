@@ -5,11 +5,19 @@ import { Outlet, useNavigate } from 'react-router'
 import { AppContext } from '../Context/context'
 
 const Layout = () => {
-  const { user } = useContext(AppContext)
+  const { user, logout } = useContext(AppContext)
   const navigate = useNavigate()
+  const expiryDate = localStorage.getItem('expiryDate') || null
 
   const navigateEvent = useEffectEvent(() => {
-    if (!user) navigate('/login')
+    if (!user || !expiryDate) navigate('/login')
+
+    const expiry = new Date(expiryDate)
+    const now = new Date()
+    if (now >= expiry) {
+      logout()
+      navigate('/login')
+    }
   })
 
   useEffect(() => {
